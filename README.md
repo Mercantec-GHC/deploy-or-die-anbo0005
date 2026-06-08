@@ -2,6 +2,8 @@
 
 Курс **Deploy or Die** · VM `andrii-deploy` · домен [andrii.mercantec.tech](https://andrii.mercantec.tech)
 
+**GitHub:** [Mercantec-GHC/deploy-or-die-anbo0005](https://github.com/Mercantec-GHC/deploy-or-die-anbo0005) (public)
+
 ## Статус
 
 | День | Тема | Статус |

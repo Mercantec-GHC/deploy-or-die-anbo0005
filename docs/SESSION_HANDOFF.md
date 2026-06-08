@@ -1,6 +1,6 @@
 # Session handoff — Deploy
 
-> Andrii Bondar · `anbo0005@edu.mercantec.dk` · **resume 2026-06-08**
+> Andrii Bondar · `anbo0005@edu.mercantec.dk` · **resume 2026-06-08** · [GitHub](https://github.com/Mercantec-GHC/deploy-or-die-anbo0005)
 
 ## Статус курса
 
@@ -43,11 +43,20 @@
 
 ## Следующий шаг (Day 5+)
 
-1. .NET app + reverse proxy (nginx → app)
+1. .NET app + reverse proxy (`location /api/` → Kestrel :5000)
 2. Docker network для app в контейнере (Day 7)
 3. NIS2/CRA — устно ⬜
 
 **Не открывать в UFW:** 5432, 8080.
+
+### Быстрый чек после reboot
+
+```bash
+docker ps                    # postgres · cloudflared Up
+systemctl status nginx       # active
+curl -I http://127.0.0.1:8080/
+curl -I https://andrii.mercantec.tech
+```
 
 ---
 
@@ -57,8 +66,9 @@
 - **502** = tunnel OK, но origin недоступен (пустой 8080 · cloudflared в bridge · нет IPv6 на 8080) · **1003** = прямой IP CF в браузере
 - **dig** → Cloudflare IP — нормально
 - **БД:** `docker exec ... psql` · с Mac: `ssh -L 5433:127.0.0.1:5432 mercantec-andrii`
-- **Команды:** `docs/notes/dayN-*.md` § Команды (`COMMANDS.md` удалён)
-- **Лог:** `docs/DEPLOY_RESULTS_LOG.md` · **теория:** `MY_NOTES.md`
+- **Команды:** `docs/notes/dayN-*.md` § Команды
+- **GitHub:** [Mercantec-GHC/deploy-or-die-anbo0005](https://github.com/Mercantec-GHC/deploy-or-die-anbo0005)
+- **Лог:** `docs/DEPLOY_RESULTS_LOG.md` · **теория:** `MY_NOTES.md` (local, не в git)
 
 ---
 
