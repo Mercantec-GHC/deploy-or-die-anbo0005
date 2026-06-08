@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  participant C as Client
+  participant S as Linux server
+  C->>S: TCP SYN (port 22)
+  S->>C: TCP SYN-ACK
+  S->>C: SSH-2.0-OpenSSH_8.9
+  C->>S: SSH-2.0-OpenSSH_9.0
+  rect rgb(220, 230, 255)
+    Note over C,S: Key exchange (Diffie-Hellman)
+    C->>S: Client algorithms + DH public key
+    S->>C: Server algorithms + DH public key + host key signature
+    Note over C,S: Both sides compute shared secret
+  end
+  rect rgb(210, 250, 210)
+    Note over C,S: Encrypted channel established (AES-256)
+  end
+  rect rgb(255, 245, 210)
+    Note over C,S: Authentication phase
+    C->>S: Auth request (publickey)
+    S->>C: Public key valid?
+    C->>S: Signature with private key
+    S->>C: Authentication successful
+  end
+  C->>S: Shell request
+  S->>C: Shell ready

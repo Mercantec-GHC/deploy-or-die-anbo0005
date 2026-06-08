@@ -1,0 +1,8 @@
+graph LR
+  A[Your PC] -->|WITHOUT| B[Attacker] --> C[Server]
+  B -.->|steals data| X[blocked]
+  D[Your PC] -->|WITH| E[known_hosts]
+  E -->|match| F[Safe]
+  E -->|changed| G[MITM warning!]
+  style B fill:#f44336
+  style G fill:#ff9800

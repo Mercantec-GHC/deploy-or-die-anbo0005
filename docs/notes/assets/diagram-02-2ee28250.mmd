@@ -1,0 +1,10 @@
+flowchart TD
+    Start([Du er logget ind]) --> A[Opdater system]
+    A --> B[Opret ikke-root bruger]
+    B --> C[Tildel sudo-rettigheder]
+    C --> D[Deaktiver root-login i sshd_config]
+    D --> E[Deaktiver password-login, kun nøgler]
+    E --> F[Genstart SSH-tjeneste]
+    F --> G{Test: login virker stadig?}
+    G -- Ja --> H[Server hardened]
+    G -- Nej --> I[Luk ikke session - ret fejl]

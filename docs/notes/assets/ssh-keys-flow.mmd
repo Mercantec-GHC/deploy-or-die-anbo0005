@@ -1,0 +1,6 @@
+flowchart TD
+    A[Din PC] -->|Genererer nøglepar| B[Privat nøgle<br>~/.ssh/id_ed25519_mercantec_school]
+    A -->|Kopieres til server| C[Offentlig nøgle<br>~/.ssh/authorized_keys på serveren]
+    D[SSH-forbindelse] -->|Matcher nøgleparet| C
+    B -->|Bruges til at signere| D
+    C -->|Adgang godkendt| E[Shell på server]

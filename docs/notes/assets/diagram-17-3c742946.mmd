@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant A as Developer A
+    participant GH as GitHub
+    participant B as Developer B
+    A->>A: git checkout -b feature/x
+    A->>A: code + commit
+    A->>GH: git push origin feature/x
+    A->>GH: Create Pull Request
+    B->>GH: Review code
+    GH->>GH: Merge to main
+    B->>B: git pull

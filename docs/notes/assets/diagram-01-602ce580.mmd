@@ -1,0 +1,9 @@
+flowchart LR
+    A[FortiClient VPN-only] --> B[SSO + MFA]
+    B --> C[VPN Connected]
+    C --> D{Netværk OK for booking?}
+    D -- OLC WIFI --> E[booking portal]
+    D -- Timeout --> H[Support / lærer]
+    E --> F{VM approved?}
+    F -- Ja --> G[SSH til VM]
+    F -- Nej --> I[Vent på approve]

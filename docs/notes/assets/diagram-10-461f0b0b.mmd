@@ -1,0 +1,18 @@
+flowchart TD
+    P["p = 23   g = 5"]
+    A["Alice: a = 6<br>A = 5^6 mod 23 = 8"]
+    B["Bob: b = 15<br>B = 5^15 mod 23 = 19"]
+    KA["Alice: K = 19^6 mod 23 = 2"]
+    KB["Bob: K = 8^15 mod 23 = 2"]
+    MATCH["Both have K = 2<br>a and b never sent"]
+    P --> A & B
+    A --> KA
+    B --> KB
+    KA --> MATCH
+    KB --> MATCH
+    style P fill:#dbeafe
+    style A fill:#ede9fe
+    style B fill:#ede9fe
+    style KA fill:#dcfce7
+    style KB fill:#dcfce7
+    style MATCH fill:#fef9c3

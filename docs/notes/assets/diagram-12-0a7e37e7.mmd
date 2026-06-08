@@ -1,0 +1,19 @@
+flowchart TD
+    subgraph SIGN["Sign - client"]
+        S1["1. Nonce: r = H(sk_nonce || m)"]
+        S2["2. Point: R = r · B"]
+        S3["3. Hash: h = H(R || A || m)"]
+        S4["4. Scalar: s = r + h · sk mod L"]
+        S5["5. Signature: σ = (R, s)"]
+        S1 --> S2 --> S3 --> S4 --> S5
+    end
+    subgraph VERIFY["Verify - server"]
+        V1["1. Hash: h = H(R || A || m)"]
+        V2["2. Check: s · B == R + h · A"]
+        V3["Valid - user authenticated"]
+        V1 --> V2 --> V3
+    end
+    S5 --> V1
+    style SIGN fill:#ede9fe
+    style VERIFY fill:#dcfce7
+    style V3 fill:#fef9c3

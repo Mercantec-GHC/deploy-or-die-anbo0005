@@ -1,0 +1,5 @@
+flowchart LR
+    A[Dag 1<br>SSH + Twingate<br>+ Hardening] --> B[Dag 2<br>Domæne og DNS<br>+ Firewall]
+    B --> C[Dag 3<br>Database i Docker]
+    C --> D[Dag 4<br>Nginx + HTTPS]
+    D --> E[Dag 5<br>Release + Loadbalance]

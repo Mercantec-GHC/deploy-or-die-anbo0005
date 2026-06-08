@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant PC as Client
+  participant NET as Network
+  participant SRV as Server
+  PC->>NET: ls -la (encrypted AES-256)
+  NET->>SRV: ciphertext...
+  Note over SRV: Execute command
+  SRV->>NET: output (encrypted AES-256)
+  NET->>PC: decrypted output
+  Note over PC,SRV: Shared session key (Diffie-Hellman)

@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant A as Alice (client)
+    participant B as Bob (server)
+    Note over A: Choose private a (secret)
+    Note over B: Choose private b (secret)
+    Note over A: Compute A = g^a mod p
+    Note over B: Compute B = g^b mod p
+    A->>B: Send A (public)
+    B->>A: Send B (public)
+    Note over A: K = B^a mod p = g^ab mod p
+    Note over B: K = A^b mod p = g^ab mod p
+    Note over A,B: Same K without sending a or b

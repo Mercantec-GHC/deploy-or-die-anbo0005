@@ -1,0 +1,8 @@
+flowchart LR
+  PRI[Private key<br/>.ssh/id_ed25519]
+  PUB[Public key<br/>authorized_keys]
+  PRI ---|mathematically linked| PUB
+  PRI -->|sign| SIG[Signature]
+  PRI -->|decrypt| ENC[Encrypted data]
+  PUB -->|verify| SIG
+  PUB -->|encrypt| ENC

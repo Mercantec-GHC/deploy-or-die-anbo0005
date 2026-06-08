@@ -1,0 +1,11 @@
+sequenceDiagram
+  autonumber
+  participant C as Client (private key)
+  participant S as Server (public key)
+  C->>S: Login as administrator
+  Note over S: Lookup public key in authorized_keys
+  S->>C: Random challenge
+  Note over C: Sign challenge with private key
+  C->>S: Signature
+  Note over S: Verify with public key
+  S->>C: Authentication successful

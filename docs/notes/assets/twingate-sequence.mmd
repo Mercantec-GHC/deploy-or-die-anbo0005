@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant Du
+    participant Twingate
+    participant Server
+    Du->>Twingate: Logger ind med din Twingate-konto
+    Twingate-->>Du: Giver adgang til servernetværket
+    Du->>Server: SSH-forbindelse (port 22)
+    Server-->>Du: Beder om SSH-nøgle eller adgangskode
+    Du-->>Server: Sender offentlig nøgle / adgangskode
+    Server-->>Du: Shell-adgang

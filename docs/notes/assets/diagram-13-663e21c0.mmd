@@ -1,0 +1,14 @@
+flowchart TD
+  DH["Diffie-Hellman<br>g^ab mod p<br>Shared Secret K"]
+  KDF["KDF<br>derive keys"]
+  AES["AES-256-GCM<br>encrypts traffic"]
+  ECC["Ed25519 ECDLP<br>sk · B = A"]
+  SIG["EdDSA signature<br>Challenge-Response"]
+  AUTH["User authenticated"]
+  DH --> KDF --> AES
+  ECC --> SIG --> AUTH
+  AUTH --> AES
+  style DH fill:#e3f2fd
+  style ECC fill:#f3e5f5
+  style AES fill:#e8f5e8
+  style AUTH fill:#fff9c4

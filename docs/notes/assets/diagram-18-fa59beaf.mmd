@@ -1,0 +1,7 @@
+flowchart TD
+    A[Code locally on PC] -->|git commit + git push| B[GitHub: main updated]
+    B -->|SSH to server| C[VPS: git pull]
+    C --> D{Code changes?}
+    D -- Yes --> E[Restart application]
+    D -- No --> F[Nothing to do]
+    E --> G[New version running on server]
