@@ -403,17 +403,18 @@ docker pull USERNAME/minapp:1.0.0
 
 # Чеклист целей обучения
 
-> ⬜ Day 6 — простое app в container
+> ✅ Day 6 — MercantecApi в container на VM (2026-06-09)
 
-- [ ] Установить Docker и проверить (`docker run hello-world`) — **у тебя уже ✅ Day 3**
-- [ ] Объяснить **image** vs **container** (шаблон vs экземпляр; один image, много containers)
-- [ ] Описать **client, daemon, registry** и flow build/run/pull
-- [ ] Написать Dockerfile с FROM, WORKDIR, COPY, RUN, EXPOSE, CMD
-- [ ] Использовать **`.dockerignore`**
-- [ ] `docker build -t ... .` и `docker run -d -p ...`
-- [ ] `docker ps`, `docker logs`, `docker exec`
-- [ ] Объяснить **layers/caching** и порядок строк в Dockerfile
-- [ ] Кратко понимать **volumes** (данные переживают container)
+- [x] Установить Docker и проверить (`docker run hello-world`) — **Day 3 ✅**
+- [x] Объяснить **image** vs **container**
+- [x] Описать **client, daemon, registry** и flow build/run/pull
+- [x] Написать Dockerfile с FROM, WORKDIR, COPY, RUN, EXPOSE, CMD
+- [x] Использовать **`.dockerignore`**
+- [x] `docker build -t mercantec-api .` и `docker run -d -p 127.0.0.1:5000:8080`
+- [x] Проверка: `curl :5000/weatherforecast` и `:8080/api/weatherforecast` → **200**
+- [ ] `docker ps`, `docker logs`, `docker exec` — по желанию повторить
+- [x] Layers/caching — в Dockerfile (restore до COPY кода)
+- [ ] Volumes для app — Day 9
 
 ---
 

@@ -13,14 +13,14 @@
 | 3 | Docker, PostgreSQL, tunnel | ✅ |
 | 4 | Nginx на VM, static site | ✅ (Certbot на VM ⬜ — HTTPS от Cloudflare) |
 | 5 | Reverse proxy, docs, refleksion | ✅ |
-| 6 | Dockerfile, app в container | ⬜ теория в notes |
-| — | **ASP.NET Web API** (`app/`) | ⬜ dev на Mac · deploy Docker |
+| 6 | Dockerfile, app в container | ✅ `mercantec-api` на VM |
+| — | **ASP.NET Web API** (`app/MercantecApi/`) | ✅ Mac dev · Docker deploy |
 
 ## Структура репо
 
 ```text
 docs/     — конспекты и handoff
-app/      — ASP.NET Web API + Dockerfile (создашь)
+app/MercantecApi/  — ASP.NET Web API + Dockerfile
 ```
 
 **Dev на Mac** → `git push` → **VM:** `git pull` + `docker run`
@@ -45,6 +45,6 @@ app/      — ASP.NET Web API + Dockerfile (создашь)
 ## Стек на VM
 
 - **На сервере:** SSH, UFW, Docker Engine, Nginx (`:8080` → tunnel · `/api/` → `:5000`)
-- **В Docker:** `postgres`, `cloudflared` · позже `mercantec-api`
-- **App (plan):** `app/MercantecApi/` — Web API в этом репо
+- **В Docker:** `postgres`, `cloudflared`, **`mercantec-api`** (`127.0.0.1:5000→8080`)
+- **App:** `app/MercantecApi/` — Web API · `/api/weatherforecast` через nginx
 - **Доступ:** Cloudflare Tunnel (нет public IP)

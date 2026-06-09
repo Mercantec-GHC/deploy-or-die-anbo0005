@@ -32,10 +32,10 @@
 | 3 | [notes/day3-docker-database.md](./notes/day3-docker-database.md) | ✅ complete |
 | 4 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | ✅ nginx VM · Hello World · :8080 |
 | 5 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | ✅ docs · `/api/` в nginx |
-| 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ⬜ теория · Dockerfile после .NET |
+| 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ✅ Dockerfile · `mercantec-api` на VM |
 | 7–15 | `notes/dayN-....md` | по мере прохождения |
 
-**Следующая практика:** `app/MercantecApi` на Mac → Docker на VM — [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) · [WORKFLOW.md](./WORKFLOW.md)
+**Следующая практика:** Day 7+ · публичный `/api/` — [SESSION_HANDOFF.md](./SESSION_HANDOFF.md)
 
 ---
 
@@ -70,4 +70,4 @@
 
 ---
 
-*Обновлено: 2026-06-09 (day1–6: язык выровнен)*
+*Обновлено: 2026-06-09 · Day 6 deploy ✅*

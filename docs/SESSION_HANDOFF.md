@@ -2,7 +2,7 @@
 
 > Andrii Bondar · `anbo0005@edu.mercantec.dk` · **resume 2026-06-09** · [GitHub](https://github.com/Mercantec-GHC/deploy-or-die-anbo0005)
 
-**Workflow:** [WORKFLOW.md](./WORKFLOW.md) · **App:** `app/` в этом же репо
+**Workflow:** [WORKFLOW.md](./WORKFLOW.md) · **App:** `app/MercantecApi/` в этом же репо
 
 ---
 
@@ -15,7 +15,7 @@
 | **Day 3** Docker + DB + tunnel | ✅ |
 | **Day 4** Nginx + static site | ✅ · Certbot на VM ⬜ (tunnel → CF HTTPS) |
 | **Day 5** Reverse proxy, docs | ✅ · nginx `location /api/` → :5000 |
-| **Day 6** Dockerfile | ⬜ теория в notes · container после app |
+| **Day 6** Dockerfile + container | ✅ · `mercantec-api` на VM · `/api/weatherforecast` **200** |
 
 ---
 
@@ -24,10 +24,10 @@
 ```text
 deploy-or-die-anbo0005/
 ├── docs/              # notes, handoff, workflow
-├── app/               # ASP.NET Web API + Dockerfile (создашь)
-│   └── MercantecApi/
+├── app/
+│   └── MercantecApi/  # Web API + Dockerfile + .dockerignore
 ├── README.md
-└── .gitignore         # + bin/, obj/, appsettings.*.local
+└── .gitignore
 ```
 
 **Решение:** один repo — docs + app. Dev **на Mac**, на VM только **Docker** (SDK на сервере не нужен постоянно).
@@ -54,79 +54,41 @@ deploy-or-die-anbo0005/
 |-----------|--------|
 | `postgres` | Docker · `127.0.0.1:5432` |
 | `cloudflared` | Docker · `--network host` |
-| **nginx** | `:8080` static + **`/api/` → :5000** |
-| **app container** | ⬜ |
-| **.NET SDK на VM** | ⬜ не нужен для dev (только внутри `docker build`) |
+| **`mercantec-api`** | Docker · `127.0.0.1:5000→8080` · **Up** |
+| **nginx** | `:8080` static + **`/api/` → :5000** · weatherforecast **200** |
+| **.NET SDK на VM (хост)** | ❌ не установлен — только в Docker images |
+
+**Repo на VM:** `~/GitHub/deploy-or-die-anbo0005`
 
 ---
 
-## Следующий шаг — ASP.NET Web API (ты на Mac)
+## Порт `-p 127.0.0.1:5000:8080` (кратко)
 
-> Команды ниже — для **тебя**. Агент не ставит пакеты без «сделай».
+Формат: **`хост_IP : порт_на_VM : порт_внутри_container`**
 
-### 1. .NET 8 SDK на Mac
+| Часть | Значение |
+|-------|----------|
+| `127.0.0.1` | слушать только localhost VM (не из интернета) |
+| `5000` | снаружи container — сюда стучится nginx (`proxy_pass :5000`) |
+| `8080` | внутри container — Kestrel (`ASPNETCORE_URLS=http://+:8080`) |
 
-```bash
-# macOS — официальный install script (или brew install dotnet@8)
-# Проверка:
-dotnet --version
-```
+nginx `:8080` — **другой** порт (tunnel → static + `/api/`). Не путать с `8080` внутри container.
 
-Документация: https://dotnet.microsoft.com/download/dotnet/8.0
+---
 
-### 2. Создать проект в `app/`
-
-Из корня Deploy-репо на Mac:
+## Обновить app на VM (повторный deploy)
 
 ```bash
-cd /Users/andriibondar/Projects/VSCode/Mercantec/Deploy
-mkdir -p app
-cd app
-dotnet new webapi -n MercantecApi -o MercantecApi --use-controllers
-cd MercantecApi
-dotnet run --urls http://127.0.0.1:5000
-```
-
-### 3. Проверка локально (второй терминал)
-
-```bash
-curl http://127.0.0.1:5000/weatherforecast
-```
-
-### 4. Commit + push (когда готов)
-
-```bash
-cd /Users/andriibondar/Projects/VSCode/Mercantec/Deploy
-git add app/ .gitignore
-git status   # нет bin/, obj/, секретов
-git commit -m "Add MercantecApi Web API scaffold"
-git push
-```
-
-### 5. На VM — clone/pull + Docker (Day 6)
-
-```bash
-mkdir -p ~/GitHub
-cd ~/GitHub
-git clone https://github.com/Mercantec-GHC/deploy-or-die-anbo0005.git
-# или git pull если уже есть
-
-cd deploy-or-die-anbo0005/app/MercantecApi
-# после Dockerfile:
+cd ~/GitHub/deploy-or-die-anbo0005
+git pull
+cd app/MercantecApi
 docker build -t mercantec-api .
+docker stop mercantec-api && docker rm mercantec-api
 docker run -d --name mercantec-api -p 127.0.0.1:5000:8080 --restart unless-stopped mercantec-api
-```
-
-### 6. Проверка через nginx
-
-```bash
+curl http://127.0.0.1:5000/weatherforecast
 curl http://127.0.0.1:8080/api/weatherforecast
 curl https://andrii.mercantec.tech/api/weatherforecast
 ```
-
-### 7. После успеха — сказать агенту обновить
-
-- `SERVER_INFO.md` · `DEPLOY_RESULTS_LOG.md` · `MY_NOTES.md`
 
 **Не открывать в UFW:** 5432, 8080, 5000.
 
@@ -138,15 +100,15 @@ curl https://andrii.mercantec.tech/api/weatherforecast
 docker ps
 systemctl status nginx
 curl -I http://127.0.0.1:8080/
+curl http://127.0.0.1:8080/api/weatherforecast
 ```
 
 ---
 
 ## Ключевые факты (для агента)
 
-- **Dev:** Mac · **Run on VM:** Docker container → `:5000` · nginx `/api/`
-- **Repo path app:** `app/MercantecApi/`
-- **502** origin · **530** tunnel
+- **Dev:** Mac · **Run on VM:** Docker `mercantec-api` → host `:5000` · nginx `/api/`
+- **502** origin (app down) · **530** tunnel
 - Commit/push только по запросу пользователя
 
 ---
@@ -155,4 +117,10 @@ curl -I http://127.0.0.1:8080/
 
 - SSH host key MFyp ↔ P4Z
 - Tunnel периодический 530
-- `dotnet` not on Mac yet — шаг 1 выше
+
+---
+
+## Следующее ⬜
+
+- Проверка публичного URL `/api/weatherforecast`
+- Day 7+ по программе курса

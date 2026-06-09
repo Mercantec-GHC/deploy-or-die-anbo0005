@@ -95,9 +95,9 @@ test curl localhost                                   docker run → :5000
 
 ## Следующая задача
 
-1. **Mac:** .NET 8 SDK → `dotnet new webapi` в `app/MercantecApi`
-2. Локальный `dotnet run` + curl
-3. **Day 6:** Dockerfile → на VM container на `:5000`
+1. **Day 6 ✅** — `mercantec-api` на VM · `/api/weatherforecast` **200**
+2. Публичная проверка `https://andrii.mercantec.tech/api/weatherforecast`
+3. Day 7+ по программе курса
 
 Детали: `docs/SESSION_HANDOFF.md`
 
@@ -111,4 +111,4 @@ test curl localhost                                   docker run → :5000
 
 ---
 
-*Обновлено: 2026-06-09 · app/ в том же репо · dev Mac · deploy Docker*
+*Обновлено: 2026-06-09 · Day 6 deploy ✅ · mercantec-api на VM*

@@ -124,7 +124,7 @@
 ### Проверка ✅ / ожидаемо ⬜
 
 - `curl http://127.0.0.1:8080/` → **200** (static)
-- `curl http://127.0.0.1:8080/api/` → **502** — нормально, Kestrel на :5000 ещё нет
+- `curl http://127.0.0.1:8080/api/` → **502** (до Day 6) · после container → **200** `/api/weatherforecast`
 - `https://andrii.mercantec.tech` → **200** (иногда **530** — tunnel reconnect)
 
 ### Dokumentation + refleksion ✅
@@ -132,10 +132,39 @@
 - Компоненты и request flow — в `docs/notes/day5-reverse-proxy-release.md`
 - Чеклист дня отмечен
 
-### Следующее ⬜
+### Следующее ✅ (Day 6)
 
-- ASP.NET Core Web API · SDK 8 на VM · Kestrel `:5000`
+- ASP.NET Core Web API · Docker container на `:5000` — см. Day 6
 
 ---
 
-*Обновлено: 2026-06-09 · Day 5 ✅ · next: ASP.NET Web API*
+## Day 6 — Dockerfile, app container ✅
+
+### MercantecApi (Mac + repo) ✅
+
+- Web API в `app/MercantecApi/` · .NET 8 · локально на Mac `:5000`
+- `Dockerfile` multi-stage (sdk → aspnet) · `.dockerignore`
+- Commit `f1a7aac` — Dockerfile + docs
+
+### Docker build + run на VM ✅
+
+- Repo на VM: `~/GitHub/deploy-or-die-anbo0005` · `git pull`
+- `docker build -t mercantec-api .` — OK
+- Images: `mcr.microsoft.com/dotnet/sdk:8.0`, `aspnet:8.0`, `mercantec-api:latest`
+- Container **`mercantec-api`** — **Up** · `-p 127.0.0.1:5000:8080` · `--restart unless-stopped`
+- Container ID: `fc753af9ee99...`
+- **.NET SDK на хосте VM** — нет (только внутри Docker build/runtime)
+
+### Проверка ✅
+
+- `curl http://127.0.0.1:5000/weatherforecast` → **200** JSON (напрямую в container)
+- `curl http://127.0.0.1:8080/api/weatherforecast` → **200** JSON (через nginx `/api/`)
+
+### Следующее ⬜
+
+- Публичная проверка `https://andrii.mercantec.tech/api/weatherforecast`
+- Day 7+ по программе курса
+
+---
+
+*Обновлено: 2026-06-09 · Day 6 ✅ · API в Docker на :5000*
