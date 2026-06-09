@@ -12,6 +12,8 @@
 | 2 | UFW, DNS, Cloudflare Tunnel | ✅ (NIS2/CRA устно ⬜) |
 | 3 | Docker, PostgreSQL, tunnel | ✅ |
 | 4 | Nginx на VM, static site | ✅ (Certbot на VM ⬜ — HTTPS от Cloudflare) |
+| 5 | Reverse proxy, docs, refleksion | ✅ |
+| 6 | Dockerfile, app в container | ⬜ в notes |
 
 ## Документы
 
@@ -24,6 +26,8 @@
 | [docs/notes/day2-dns-firewall.md](docs/notes/day2-dns-firewall.md) | Day 2 |
 | [docs/notes/day3-docker-database.md](docs/notes/day3-docker-database.md) | Day 3 |
 | [docs/notes/day4-nginx-https.md](docs/notes/day4-nginx-https.md) | Day 4 |
+| [docs/notes/day5-reverse-proxy-release.md](docs/notes/day5-reverse-proxy-release.md) | Day 5 |
+| [docs/notes/day6-docker-dockerfile.md](docs/notes/day6-docker-dockerfile.md) | Day 6 |
 
 **Private (не в git):** `SERVER_INFO.md` · `MY_NOTES.md` — см. `.gitignore`
 

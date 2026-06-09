@@ -14,6 +14,8 @@
 | [notes/day2-dns-firewall.md](./notes/day2-dns-firewall.md) | Day 2 — DNS, Cloudflare, UFW + команды |
 | [notes/day3-docker-database.md](./notes/day3-docker-database.md) | Day 3 — Docker, DB, tunnel + команды |
 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | Day 4 — Nginx, HTTPS, Certbot + команды |
+| [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | Day 5 — Reverse proxy, docs, refleksion + команды |
+| [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | Day 6 — Dockerfile, build, run + команды |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
 | [DEPLOY_RESULTS_LOG.md](./DEPLOY_RESULTS_LOG.md) | Короткий лог результатов по дням (без команд) |
@@ -28,7 +30,9 @@
 | 2 | [notes/day2-dns-firewall.md](./notes/day2-dns-firewall.md) | UFW ✅ · tunnel DNS ✅ (teacher) |
 | 3 | [notes/day3-docker-database.md](./notes/day3-docker-database.md) | ✅ complete |
 | 4 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | ✅ nginx VM · Hello World · :8080 |
-| 5–15 | `notes/dayN-....md` | по мере прохождения |
+| 5 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | ✅ docs · `/api/` в nginx |
+| 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ⬜ Dockerfile + app container |
+| 7–15 | `notes/dayN-....md` | по мере прохождения |
 
 ---
 
@@ -42,6 +46,8 @@
 - `day2-dns-firewall.md`
 - `day3-docker-database.md`
 - `day4-nginx-https.md`
+- `day5-reverse-proxy-release.md`
+- `day6-docker-dockerfile.md`
 - ...
 - `day15-aflevering-fremlaeggelse.md`
 

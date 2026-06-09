@@ -13,91 +13,42 @@
 1. Я могу установить и настроить Nginx для раздачи статических файлов через virtual host
 2. Я могу выдать и включить сертификат Let's Encrypt с auto-renewal (Certbot)
 3. Я могу принудительно направлять HTTP на HTTPS и объяснить, почему это важно
+
 - :theory-icon: Теория дня
-
-    # День 4 – Nginx, HTTPS и SSL
-
+  # День 4 – Nginx, HTTPS и SSL
   > Теория к Дню 4 (11 июня). От «пустого» сервера к веб-серверу с Nginx, Let's Encrypt и редиректом на HTTPS.
-  >
-
-    ---
-
-    ## Nginx — что и зачем
-
+  ---
+  ## Nginx — что и зачем
     **Nginx** — веб-сервер и reverse proxy: принимает HTTP(S)-запросы, может отдавать статические файлы, проксировать на приложение (порт 3000, 5000 и т.д.) или балансировать нагрузку. Быстрый, популярный, настраивается через **virtual hosts** (один домен/subdomain на конфиг).
-
-    - **Установка (Linux):** `sudo apt update`, `sudo apt install nginx`. Включить: `sudo systemctl enable nginx`, `sudo systemctl start nginx`. Проверка: `curl http://localhost` — default «Welcome to nginx!».
-    - **Конфиг:** `/etc/nginx/` — `nginx.conf`, `sites-available/` (все сайты), `sites-enabled/` (symlink на активные). После правок: `sudo nginx -t`, `sudo systemctl reload nginx`.
-
-    ---
-
-    ## Virtual hosts и static file serving
-
+  - **Установка (Linux):** `sudo apt update`, `sudo apt install nginx`. Включить: `sudo systemctl enable nginx`, `sudo systemctl start nginx`. Проверка: `curl http://localhost` — default «Welcome to nginx!».
+  - **Конфиг:** `/etc/nginx/` — `nginx.conf`, `sites-available/` (все сайты), `sites-enabled/` (symlink на активные). После правок: `sudo nginx -t`, `sudo systemctl reload nginx`.
+  ---
+  ## Virtual hosts и static file serving
     **Virtual host** (server block) говорит Nginx: «когда запросят *этот* домен — делай так».
-
-    ```
-    server {
-        listen 80;
-        server_name jeresprojekt.mercantec.tech;
-        root /var/www/jeresprojekt;
-        index index.html;
-        location / {
-            try_files $uri $uri/ =404;
-        }
-    }
-    ```
-
-    - `listen 80` — порт HTTP.
-    - `server_name` — домен блока (должен совпадать с DNS).
-    - `root` — папка со статикой (HTML, CSS, JS).
-    - `index` — файл по умолчанию для `/`.
-    - `try_files` — отдать файл или 404.
-
+  - `listen 80` — порт HTTP.
+  - `server_name` — домен блока (должен совпадать с DNS).
+  - `root` — папка со статикой (HTML, CSS, JS).
+  - `index` — файл по умолчанию для `/`.
+  - `try_files` — отдать файл или 404.
     Практика: `sudo mkdir -p /var/www/jeresprojekt`, положить `index.html`, конфиг в `sites-available` + symlink в `sites-enabled`.
-
-    ---
-
-    ## HTTPS и Let's Encrypt
-
+  ---
+  ## HTTPS и Let's Encrypt
     **HTTPS** — HTTP + TLS: трафик между браузером и сервером шифруется. Браузер показывает замок.
-
     **Let's Encrypt** — бесплатные доверенные сертификаты на 90 дней. Продление — **Certbot**.
-
-    - Установка: `sudo apt install certbot python3-certbot-nginx`
-    - Выдача: `sudo certbot --nginx -d jeresprojekt.mercantec.tech`
-    - Требования: DNS указывает на **ваш** сервер, порт **80** открыт (HTTP-01 challenge), Nginx запущен.
-
-    ---
-
-    ## Auto-renewal
-
+  - Установка: `sudo apt install certbot python3-certbot-nginx`
+  - Выдача: `sudo certbot --nginx -d jeresprojekt.mercantec.tech`
+  - Требования: DNS указывает на **ваш** сервер, порт **80** открыт (HTTP-01 challenge), Nginx запущен.
+  ---
+  ## Auto-renewal
     Certbot создаёт timer/cron. Проверка:
-
-    ```bash
-    sudo certbot renew --dry-run
-    ```
-
-    ---
-
-    ## HTTP → HTTPS redirect
-
-    ```
-    server {
-        listen 80;
-        server_name jeresprojekt.mercantec.tech;
-        return 301 https://$server_name$request_uri;
-    }
-    ```
-
+  ---
+  ## HTTP → HTTPS redirect
     Без redirect пользователь может случайно остаться на HTTP — пароли и cookies в открытом виде. **301** — постоянный redirect (браузер запоминает HTTPS).
-
-    ---
-
-    ## Цели обучения (итог)
-
-    1. Установить Nginx и virtual host для статики.
-    2. Выдать Let's Encrypt через Certbot и проверить auto-renewal.
-    3. Настроить HTTP → HTTPS и объяснить зачем.
+  ---
+  ## Цели обучения (итог)
+  1. Установить Nginx и virtual host для статики.
+  2. Выдать Let's Encrypt через Certbot и проверить auto-renewal.
+  3. Настроить HTTP → HTTPS и объяснить зачем.
 
 # День 4 – Nginx, HTTPS и SSL (углублённая теория)
 
@@ -129,6 +80,8 @@ B -->|Читает файл| C["/var/www/html/index.html"]
 B -->|HTTP 200 + HTML| A
 ```
 
+
+
 **Nginx** («engine-x»):
 
 - **Производительность:** асинхронная event-driven модель — много соединений, мало памяти
@@ -140,7 +93,7 @@ B -->|HTTP 200 + HTML| A
 
 📺 **Video: What is Nginx? – TechWorld with Nana**
 
-https://www.youtube.com/watch?v=iInUBOVeBCc
+[https://www.youtube.com/watch?v=iInUBOVeBCc](https://www.youtube.com/watch?v=iInUBOVeBCc)
 
 ---
 
@@ -157,6 +110,8 @@ graph TD
     W1 --> C1[Клиенты 1...N]
     W2 --> C2[Клиенты N...M]
 ```
+
+
 
 - **Master:** читает config, биндит порты, управляет workers
 - **Workers:** обрабатывают запросы асинхронно
@@ -211,6 +166,8 @@ flowchart TD
     D --> G[location blocks]
 ```
 
+
+
 - DNS должен указывать на сервер (или tunnel — см. §10)
 - `listen 80 default_server` — ловит «чужие» запросы на порт 80
 - Точное `server_name` важнее wildcard
@@ -232,6 +189,8 @@ sequenceDiagram
     D-->>N: Содержимое
     N-->>B: HTTP/1.1 200 OK + HTML
 ```
+
+
 
 ### Location blocks
 
@@ -259,6 +218,8 @@ graph LR
     end
 ```
 
+
+
 **TLS handshake** (упрощённо):
 
 ```mermaid
@@ -273,13 +234,15 @@ sequenceDiagram
     Note over C,S: Дальше трафик шифруется session key
 ```
 
+
+
 - **Сертификат** — доказательство, что public key принадлежит домену
 - **CA** — доверенный издатель (Let's Encrypt)
 - **Private key** — только на сервере, секрет
 
 📺 **Video: TLS Handshake – Computerphile**
 
-https://www.youtube.com/watch?v=86cQJ0MMses
+[https://www.youtube.com/watch?v=86cQJ0MMses](https://www.youtube.com/watch?v=86cQJ0MMses)
 
 ---
 
@@ -305,6 +268,8 @@ sequenceDiagram
     L->>C: Сертификат выдан
 ```
 
+
+
 Нужно: порт 80, DNS на **IP сервера**, Nginx работает.
 
 ### После `certbot --nginx`
@@ -324,6 +289,8 @@ graph TD
     E -->|Да| F[Новый cert + reload nginx]
     E -->|Нет| G[Лог, retry завтра]
 ```
+
+
 
 ```bash
 sudo systemctl status certbot.timer
@@ -346,6 +313,8 @@ sequenceDiagram
     B->>N443: GET https://example.com/page
     N443->>B: 200 OK (шифровано)
 ```
+
+
 
 - **301** — permanent (браузер кэширует HTTPS)
 - **302** — temporary (каждый раз спрашивает HTTP)
@@ -373,6 +342,8 @@ flowchart TD
     F --> K[tail -f /var/log/nginx/error.log]
 ```
 
+
+
 ---
 
 ## 10. Наша setup: Cloudflare Tunnel *(важно)*
@@ -389,13 +360,17 @@ flowchart LR
     N --> F["/var/www/andrii/index.html"]
 ```
 
-| | Учебник | Наша VM |
-|---|---|---|
-| Public IP | есть | **нет** |
-| DNS | A → IP сервера | teacher → **Cloudflare Tunnel** |
-| HTTPS снаружи | Certbot на VM | **Cloudflare** (уже замок в браузере) |
-| Origin | Nginx :80 / :443 | Nginx **`127.0.0.1:8080`** (маршрут tunnel) |
-| `web-test` (Day 3) | — | временный nginx в Docker → **убрать** на Day 4 |
+
+
+
+|                    | Учебник          | Наша VM                                        |
+| ------------------ | ---------------- | ---------------------------------------------- |
+| Public IP          | есть             | **нет**                                        |
+| DNS                | A → IP сервера   | teacher → **Cloudflare Tunnel**                |
+| HTTPS снаружи      | Certbot на VM    | **Cloudflare** (уже замок в браузере)          |
+| Origin             | Nginx :80 / :443 | Nginx `**127.0.0.1:8080`** (маршрут tunnel)    |
+| `web-test` (Day 3) | —                | временный nginx в Docker → **убрать** на Day 4 |
+
 
 **Вывод:**
 
@@ -406,12 +381,14 @@ flowchart LR
 
 ### web-test vs nginx на VM (Day 3 → Day 4)
 
-| | `web-test` (Docker) | Nginx (`apt`) |
-|---|---|---|
-| Где | контейнер | система + systemd |
-| Конфиг | внутри image | `/etc/nginx/sites-available/` |
-| После reboot | вручную (`restart=no`) | `systemctl enable nginx` |
-| Цель | проверить tunnel | постоянный веб-сервер |
+
+|              | `web-test` (Docker)    | Nginx (`apt`)                 |
+| ------------ | ---------------------- | ----------------------------- |
+| Где          | контейнер              | система + systemd             |
+| Конфиг       | внутри image           | `/etc/nginx/sites-available/` |
+| После reboot | вручную (`restart=no`) | `systemctl enable nginx`      |
+| Цель         | проверить tunnel       | постоянный веб-сервер         |
+
 
 ---
 
@@ -432,6 +409,8 @@ flowchart TD
     I -->|Да| J[certbot renew --dry-run]
     J --> End([Готово])
 ```
+
+
 
 **Наш сокращённый flow:** убрать `web-test` → nginx на 8080 → Hello World → `curl` localhost + домен **200**.
 
@@ -460,7 +439,7 @@ flowchart TD
 
 **Порядок шагов:** 0 → 1 → 2 → 3 → 4 ✅ (2026-06-08). Шаг 5–6 — теория / если teacher даст A-record на IP VM.
 
-> **`nginx -t` без sudo** → `Permission denied` · всегда **`sudo nginx -t`**
+> `**nginx -t` без sudo** → `Permission denied` · всегда `**sudo nginx -t`**
 
 ---
 
@@ -585,13 +564,15 @@ ss -tlnp | grep nginx
 
 **Строки конфига:**
 
-| Директива | Значение |
-|-----------|----------|
+
+| Директива               | Значение                     |
+| ----------------------- | ---------------------------- |
 | `listen 127.0.0.1:8080` | HTTP только с localhost IPv4 |
-| `listen [::1]:8080` | то же для IPv6 |
-| `server_name` | `andrii.mercantec.tech` |
-| `root` | `/var/www/andrii` |
-| `try_files` | файл → папка → 404 |
+| `listen [::1]:8080`     | то же для IPv6               |
+| `server_name`           | `andrii.mercantec.tech`      |
+| `root`                  | `/var/www/andrii`            |
+| `try_files`             | файл → папка → 404           |
+
 
 ---
 
@@ -700,14 +681,16 @@ docker logs cloudflared --tail 20
 
 ### Типичные ошибки (наша setup)
 
-| Симптом | Причина | Действие |
-|--------|---------|----------|
-| 502 на домене | ничего на 8080 / cloudflared down | шаг 3 · `docker ps` cloudflared |
-| 502 после nginx | слушает только :80 | `listen 127.0.0.1:8080` в site config |
-| `bind() failed` | web-test или другой процесс на 8080 | `ss -tlnp \| grep 8080` · stop контейнер |
-| 403 Forbidden | права на `/var/www/andrii` | `chown www-data:www-data` |
-| 404 Not Found | нет index.html или неверный `root` | `ls /var/www/andrii/` |
-| certbot fail | DNS не на IP VM | tunnel — спросить teacher |
+
+| Симптом         | Причина                             | Действие                                |
+| --------------- | ----------------------------------- | --------------------------------------- |
+| 502 на домене   | ничего на 8080 / cloudflared down   | шаг 3 · `docker ps` cloudflared         |
+| 502 после nginx | слушает только :80                  | `listen 127.0.0.1:8080` в site config   |
+| `bind() failed` | web-test или другой процесс на 8080 | `ss -tlnp | grep 8080` · stop контейнер |
+| 403 Forbidden   | права на `/var/www/andrii`          | `chown www-data:www-data`               |
+| 404 Not Found   | нет index.html или неверный `root`  | `ls /var/www/andrii/`                   |
+| certbot fail    | DNS не на IP VM                     | tunnel — спросить teacher               |
+
 
 ---
 
@@ -721,3 +704,4 @@ sudo nginx -t                     # тест синтаксиса — всегд
 ls -la /etc/nginx/sites-enabled/  # какие сайты активны
 cat /etc/nginx/sites-available/andrii.mercantec.tech   # посмотреть конфиг
 ```
+
