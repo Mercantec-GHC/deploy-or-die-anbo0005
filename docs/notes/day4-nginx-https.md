@@ -1,4 +1,4 @@
-## Dag 4 - (11. juni) - **Web Server Setup (Nginx) + HTTPS & SSL**
+## День 4 — (11 июня) — **Nginx + HTTPS и SSL**
 
 - Установка и конфигурация Nginx
 - Virtual hosts (server blocks)
@@ -30,13 +30,13 @@
   - `root` — папка со статикой (HTML, CSS, JS).
   - `index` — файл по умолчанию для `/`.
   - `try_files` — отдать файл или 404.
-    Практика: `sudo mkdir -p /var/www/jeresprojekt`, положить `index.html`, конфиг в `sites-available` + symlink в `sites-enabled`.
+    Практика: `sudo mkdir -p /var/www/andrii`, положить `index.html`, конфиг в `sites-available` + symlink в `sites-enabled`.
   ---
   ## HTTPS и Let's Encrypt
     **HTTPS** — HTTP + TLS: трафик между браузером и сервером шифруется. Браузер показывает замок.
     **Let's Encrypt** — бесплатные доверенные сертификаты на 90 дней. Продление — **Certbot**.
   - Установка: `sudo apt install certbot python3-certbot-nginx`
-  - Выдача: `sudo certbot --nginx -d jeresprojekt.mercantec.tech`
+  - Выдача: `sudo certbot --nginx -d andrii.mercantec.tech`
   - Требования: DNS указывает на **ваш** сервер, порт **80** открыт (HTTP-01 challenge), Nginx запущен.
   ---
   ## Auto-renewal

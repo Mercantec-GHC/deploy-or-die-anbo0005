@@ -1,0 +1,28 @@
+# Артефакты сборки — пересоберутся внутри docker build
+bin/
+
+# Промежуточные файлы MSBuild — не нужны в image
+obj/
+
+# История git — не нужна в container и раздувает context
+.git/
+
+# Кэш IDE — только локально на Mac
+.vs/
+
+# Личные настройки Visual Studio / Rider
+*.user
+
+# Секреты и локальные конфиги — не копировать в image
+.env
+.env.*
+appsettings.*.local.json
+
+# Документация HTTP-запросов для IDE — не для runtime
+*.http
+
+# Сам Dockerfile не должен попадать в COPY . . (build читает его отдельно)
+Dockerfile*
+
+# Этот файл тоже не нужен внутри image
+.dockerignore

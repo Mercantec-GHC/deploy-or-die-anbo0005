@@ -1,4 +1,4 @@
-## Dag 1 - (8. juni) - **SSH и базовая безопасность**
+## День 1 — (8 июня) — **SSH и базовая безопасность**
 
 - Получить собственный сервер (DigitalOcean/AWS/Azure) — мы используем серверы Datacenter через Twingate
 - Настройка SSH и Twingate VPN
@@ -26,13 +26,13 @@
     **SSH** — это зашифрованный протокол для входа и управления удалённым сервером по сети. Весь трафик (и логин, и команды) шифруется, чтобы никто не мог его прочитать.
 
     - **Порт:** стандартный порт 22 (TCP).
-    - **Команда:** `ssh bruger@host` — например `ssh root@192.168.1.10` или `ssh ubuntu@min-server.dk`.
+    - **Команда:** `ssh user@host` — например `ssh root@192.168.1.10` или `ssh ubuntu@my-server.example.com`.
     - **Вход по ключу:** вместо пароля можно использовать **пару ключей** (приватный ключ на вашем ПК, публичный ключ на сервере). Это безопаснее и проще автоматизировать.
 
     ### Подключение
 
     ```bash
-    ssh bruger@server-ip-eller-domæne
+    ssh user@SERVER-IP-OR-DOMAIN
     ```
 
     При первом подключении нужно подтвердить "fingerprint" сервера. После этого вы можете работать на сервере так, как будто сидите за ним физически.
@@ -205,15 +205,15 @@
 
 ```mermaid
 sequenceDiagram
-    participant Du
+    participant You
     participant Twingate
     participant Server
-    Du->>Twingate: Logger ind med din Twingate-konto
-    Twingate-->>Du: Giver adgang til servernetværket
-    Du->>Server: SSH-forbindelse (port 22)
-    Server-->>Du: Beder om SSH-nøgle eller adgangskode
-    Du-->>Server: Sender offentlig nøgle / adgangskode
-    Server-->>Du: Shell-adgang
+    You->>Twingate: Login (Twingate account)
+    Twingate-->>You: Access to server network
+    You->>Server: SSH connection (port 22)
+    Server-->>You: Request SSH key or password
+    You-->>Server: Send public key / password
+    Server-->>You: Shell access
 ```
 
 1. Вход в аккаунт Twingate (или FortiClient сейчас)
@@ -239,12 +239,12 @@ sequenceDiagram
 flowchart LR
     A[FortiClient VPN-only] --> B[SSO + MFA]
     B --> C[VPN Connected]
-    C --> D{Netværk OK for booking?}
+    C --> D{Network OK for booking?}
     D -- OLC WIFI --> E[booking portal]
-    D -- Timeout --> H[Support / lærer]
+    D -- Timeout --> H[Support / teacher]
     E --> F{VM approved?}
-    F -- Ja --> G[SSH til VM]
-    F -- Nej --> I[Vent på approve]
+    F -- Yes --> G[SSH to VM]
+    F -- No --> I[Wait for approve]
 ```
 
 
@@ -264,17 +264,17 @@ SSH-ключи безопаснее паролей. Вы создаёте пар
 
 ```mermaid
 flowchart TD
-    A[Din PC] -->|Genererer nøglepar| B[Privat nøgle<br>~/.ssh/id_ed25519_mercantec_school]
-    A -->|Kopieres til server| C[Offentlig nøgle<br>~/.ssh/authorized_keys på serveren]
-    D[SSH-forbindelse] -->|Matcher nøgleparet| C
-    B -->|Bruges til at signere| D
-    C -->|Adgang godkendt| E[Shell på server]
+    A[Your PC] -->|Generate key pair| B[Private key<br>~/.ssh/id_ed25519_mercantec_school]
+    A -->|Copy to server| C[Public key<br>~/.ssh/authorized_keys on server]
+    D[SSH connection] -->|Key pair match| C
+    B -->|Sign request| D
+    C -->|Access granted| E[Shell on server]
 ```
 
 **Сгенерировать ключи в терминале:**
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_mercantec_school -C "dit-navn@deployment2026"
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_mercantec_school -C "user@example.com"
 ```
 
 - Ключ сохранится в `~/.ssh/id_ed25519_mercantec_school`
@@ -283,7 +283,7 @@ ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_mercantec_school -C "dit-navn@deploym
 **Скопировать публичный ключ на сервер:**
 
 ```bash
-ssh-copy-id -i ~/.ssh/id_ed25519_mercantec_school.pub bruker@<din-server-ip>
+ssh-copy-id -i ~/.ssh/id_ed25519_mercantec_school.pub user@SERVER-IP
 ```
 
 Или вручную — показать и скопировать публичный ключ:
@@ -299,8 +299,8 @@ cat ~/.ssh/id_ed25519_mercantec_school.pub
 
 ```ssh-config
 Host mercantec-school
-    HostName <din-server-ip>
-    User bruker
+    HostName SERVER-IP
+    User user
     IdentityFile ~/.ssh/id_ed25519_mercantec_school
     IdentitiesOnly yes
 ```
@@ -310,7 +310,7 @@ Host mercantec-school
 # Шаг 3 – Войти на сервер по SSH
 
 ```bash
-ssh bruger@<din-server-ip>
+ssh user@SERVER-IP
 ```
 
 При первом входе вы увидите примерно:
@@ -331,15 +331,15 @@ Are you sure you want to continue connecting (yes/no)?
 
 ```mermaid
 flowchart TD
-    Start([Du er logget ind]) --> A[Opdater system]
-    A --> B[Opret ikke-root bruger]
-    B --> C[Tildel sudo-rettigheder]
-    C --> D[Deaktiver root-login i sshd_config]
-    D --> E[Deaktiver password-login, kun nøgler]
-    E --> F[Genstart SSH-tjeneste]
-    F --> G{Test: login virker stadig?}
-    G -- Ja --> H[Server hardened]
-    G -- Nej --> I[Luk ikke session - ret fejl]
+    Start([Logged in]) --> A[Update system]
+    A --> B[Create non-root user]
+    B --> C[Grant sudo]
+    C --> D[Disable root login in sshd_config]
+    D --> E[Disable password login, keys only]
+    E --> F[Restart SSH service]
+    F --> G{Test: login still works?}
+    G -- Yes --> H[Server hardened]
+    G -- No --> I[Keep session open, fix error]
 ```
 
 
@@ -352,8 +352,8 @@ sudo apt update && sudo apt upgrade -y
 **Создать нового пользователя и выдать sudo:**
 
 ```bash
-sudo adduser ditbrugernavn
-sudo usermod -aG sudo ditbrugernavn
+sudo adduser username
+sudo usermod -aG sudo username
 ```
 
 **Отключить root-login и password-login:**
@@ -1065,7 +1065,7 @@ docker exec -it postgres-container psql -U postgres
 - [ ]  Booking открывается (актуальный URL + при необходимости OLC WIFI на школе)
 - [ ]  VM забронирована: template **Ubuntu 24.04 Server**, approve от преподавателя
 - [ ]  SSH-ключи созданы (`~/.ssh/id_ed25519_mercantec_school`) и публичный ключ добавлен на сервер
-- [ ]  Вы входите по `ssh bruger@<ip>` без пароля
+- [ ]  Вы входите по `ssh user@SERVER-IP` без пароля
 - [ ]  Система обновлена (`apt update && apt upgrade`)
 - [ ]  Root-login отключён (`PermitRootLogin no`)
 - [ ]  Password-login отключён (`PasswordAuthentication no`)
@@ -1077,10 +1077,10 @@ docker exec -it postgres-container psql -U postgres
 
 ```mermaid
 flowchart LR
-    A[Dag 1<br>SSH + Twingate<br>+ Hardening] --> B[Dag 2<br>Domæne og DNS<br>+ Firewall]
-    B --> C[Dag 3<br>Database i Docker]
-    C --> D[Dag 4<br>Nginx + HTTPS]
-    D --> E[Dag 5<br>Release + Loadbalance]
+    A[Day 1<br>SSH + Twingate<br>+ Hardening] --> B[Day 2<br>Domain + DNS<br>+ Firewall]
+    B --> C[Day 3<br>Database in Docker]
+    C --> D[Day 4<br>Nginx + HTTPS]
+    D --> E[Day 5<br>Release + Load balance]
 ```
 
 
@@ -1125,10 +1125,10 @@ git add src/app.js
 git add .
 
 # Сохранить commit с сообщением
-git commit -m "Tilføj login-funktion"
+git commit -m "Add login feature"
 ```
 
-> ✅ **Хорошее сообщение commit:** используйте повелительную форму и конкретику. `"Ret fejl i bruger-validering"` лучше, чем `"rettelser"`.
+> ✅ **Хорошее сообщение commit:** используйте повелительную форму и конкретику. `"Fix user validation bug"` лучше, чем `"fixes"`.
 >
 
 ```mermaid
@@ -1147,7 +1147,7 @@ flowchart LR
 
 ```bash
 # Подключить локальный repo к GitHub (один раз)
-git remote add origin https://github.com/ditbrugernavn/dit-repo.git
+git remote add origin https://github.com/USERNAME/REPO.git
 
 # Push в main первый раз
 git push -u origin main
@@ -1167,7 +1167,7 @@ git push
 
 ```bash
 # Создать и переключиться на новую ветку
-git checkout -b feature/bruger-login
+git checkout -b feature/user-login
 
 # Показать все ветки
 git branch
@@ -1212,7 +1212,7 @@ git checkout main
 git pull
 
 # Merge вашей feature-ветки
-git merge feature/bruger-login
+git merge feature/user-login
 
 # Отправить объединённый результат
 git push
@@ -1220,7 +1220,7 @@ git push
 
 **Через Pull Request в GitHub (рекомендуется):**
 
-1. Отправьте ветку: `git push -u origin feature/bruger-login`
+1. Отправьте ветку: `git push -u origin feature/user-login`
 2. В GitHub нажмите **"Compare & pull request"**
 3. Опишите изменения и попросите коллегу сделать review
 4. Нажмите **Merge pull request** после одобрения
@@ -1256,16 +1256,16 @@ sequenceDiagram
 git pull
 
 # Работать в своей ветке
-git checkout -b feature/min-opgave
+git checkout -b feature/my-task
 
 # ... код, код, код ...
 
 # Сохранить работу
 git add .
-git commit -m "Implementér søgefunktion"
+git commit -m "Add search feature"
 
 # Отправить в GitHub
-git push -u origin feature/min-opgave
+git push -u origin feature/my-task
 ```
 
 ---
@@ -1289,21 +1289,21 @@ flowchart TD
 
 ```bash
 # Войти на сервер
-ssh bruger@<din-server-ip>
+ssh user@SERVER-IP
 
 # Клонировать repo
-git clone https://github.com/ditbrugernavn/dit-repo.git
-cd dit-repo
+git clone https://github.com/USERNAME/REPO.git
+cd REPO
 ```
 
 **Деплой новой версии (каждый раз при обновлении):**
 
 ```bash
 # SSH на сервер
-ssh bruger@<din-server-ip>
+ssh user@SERVER-IP
 
 # Перейти в папку проекта
-cd dit-repo
+cd REPO
 
 # Получить и применить последние изменения из GitHub
 git pull

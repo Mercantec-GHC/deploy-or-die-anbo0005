@@ -1,4 +1,4 @@
-## Dag 3 - (10. juni) - **Настройка базы данных с Docker**
+## День 3 — (10 июня) — **Настройка базы данных с Docker**
 
 - Установка Docker
 - Контейнер с базой данных (PostgreSQL/MySQL)
@@ -52,9 +52,9 @@
     ```bash
     docker run -d \
       --name postgres \
-      -e POSTGRES_USER=minbruger \
-      -e POSTGRES_PASSWORD=hemmeligt \
-      -e POSTGRES_DB=minapp \
+      -e POSTGRES_USER=myuser \
+      -e POSTGRES_PASSWORD=secret \
+      -e POSTGRES_DB=myapp \
       -p 5432:5432 \
       -v pgdata:/var/lib/postgresql/data \
       postgres:16-alpine
@@ -71,10 +71,10 @@
     ```bash
     docker run -d \
       --name mysql \
-      -e MYSQL_ROOT_PASSWORD=roothemmeligt \
-      -e MYSQL_DATABASE=minapp \
-      -e MYSQL_USER=minbruger \
-      -e MYSQL_PASSWORD=brugerhemmeligt \
+      -e MYSQL_ROOT_PASSWORD=rootsecret \
+      -e MYSQL_DATABASE=myapp \
+      -e MYSQL_USER=myuser \
+      -e MYSQL_PASSWORD=brugersecret \
       -p 3306:3306 \
       -v mysqldata:/var/lib/mysql \
       mysql:8
@@ -88,7 +88,7 @@
 
     - **Внутри контейнера:** БД слушает обычный порт (5432 Postgres, 3306 MySQL). Пользователь, пароль и имя БД — те, что задали через `-e`.
     - **С хоста или других контейнеров:** При `-p 5432:5432` приложение на **том же сервере** подключается к `localhost:5432` (или IP сервера) с теми же user/password/db.
-    - **Из другого контейнера (тот же хост):** Оба контейнера в одной **Docker-сети** (`docker network create minnet`, `docker run --network minnet ...`). App подключается по **имени сервиса** (например `postgres`) как hostname. Connection string: `host=postgres port=5432 user=minbruger password=hemmeligt dbname=minapp`.
+    - **Из другого контейнера (тот же хост):** Оба контейнера в одной **Docker-сети** (`docker network create mynet`, `docker run --network mynet ...`). App подключается по **имени сервиса** (например `postgres`) как hostname. Connection string: `host=postgres port=5432 user=myuser password=secret dbname=myapp`.
     - **Безопасность:** Сильные пароли; не открывайте порт БД в интернет без веской причины (firewall только для нужных IP). Обычно только приложение на сервере (или в той же сети) должно достучаться до БД.
 
     ---
@@ -290,9 +290,9 @@ sequenceDiagram
 ```bash
 docker run -d \
   --name postgres \
-  -e POSTGRES_USER=minbruger \
-  -e POSTGRES_PASSWORD=hemmeligt \
-  -e POSTGRES_DB=minapp \
+  -e POSTGRES_USER=myuser \
+  -e POSTGRES_PASSWORD=secret \
+  -e POSTGRES_DB=myapp \
   -p 5432:5432 \
   -v pgdata:/var/lib/postgresql/data \
   postgres:16-alpine
@@ -348,10 +348,10 @@ https://www.youtube.com/watch?v=sNXVP2suMA8
 ```bash
 docker run -d \
   --name mysql \
-  -e MYSQL_ROOT_PASSWORD=roothemmeligt \
-  -e MYSQL_DATABASE=minapp \
-  -e MYSQL_USER=minbruger \
-  -e MYSQL_PASSWORD=brugerhemmeligt \
+  -e MYSQL_ROOT_PASSWORD=rootsecret \
+  -e MYSQL_DATABASE=myapp \
+  -e MYSQL_USER=myuser \
+  -e MYSQL_PASSWORD=brugersecret \
   -p 3306:3306 \
   -v mysqldata:/var/lib/mysql \
   mysql:8
@@ -402,7 +402,7 @@ sequenceDiagram
 **Пример connection string:**
 
 ```
-postgresql://minbruger:hemmeligt@localhost:5432/minapp
+postgresql://myuser:secret@localhost:5432/myapp
 ```
 
 ---
@@ -411,13 +411,13 @@ postgresql://minbruger:hemmeligt@localhost:5432/minapp
 
 ```mermaid
 graph LR
-    NET["Docker Network<br>'minnet'"]
+    NET["Docker Network<br>'mynet'"]
     DB["Container: db<br>(postgres)"]
     APP["Container: app<br>(ваше приложение)"]
     NET --- DB
     NET --- APP
     APP -->|host=db| DB
-    APP2["Connection string:<br>postgresql://user:pass@db:5432/minapp"]
+    APP2["Connection string:<br>postgresql://user:pass@db:5432/myapp"]
     APP2 -.-> APP
 ```
 

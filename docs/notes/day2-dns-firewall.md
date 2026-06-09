@@ -1,4 +1,4 @@
-## Dag 2 - (9. juni) - **Домен, DNS и Firewall**
+## День 2 — (9 июня) — **Домен, DNS и Firewall**
 
 - Купить домен (или использовать subdomain)
 - Настройка DNS (A, CNAME records)
@@ -34,7 +34,7 @@
 
     **Домен** (например `mitprojekt.dk`) — имя, которое пользователи вводят в браузере, чтобы найти ваш сервер. Можно купить домен у registrar (One.com, GoDaddy, Simply и т.д.) или использовать **subdomain** под доменом, к которому у вас есть доступ.
 
-    **Subdomains для курса:** Преподаватель выдаёт subdomain под домены — например `jeresprojekt.mercantec.tech`, `gruppe2.gf2.dk` или `app.mags.dk`. Домены: **mercantec.tech**, **gf2.dk** и **mags.dk**. Куплены у **Simply**, **DNS перенесён в Cloudflare** — все DNS-records настраиваются в Cloudflare, регистрация домена остаётся у Simply. Одно место, чтобы направить subdomain на ваш сервер.
+    **Subdomains для курса:** Преподаватель выдаёт subdomain под домены — например `yourproject.mercantec.tech`, `gruppe2.gf2.dk` или `app.mags.dk`. Домены: **mercantec.tech**, **gf2.dk** и **mags.dk**. Куплены у **Simply**, **DNS перенесён в Cloudflare** — все DNS-records настраиваются в Cloudflare, регистрация домена остаётся у Simply. Одно место, чтобы направить subdomain на ваш сервер.
 
     - Домен сам по себе **не** указывает на сервер — нужен **DNS**.
     - При покупке домена вы получаете доступ к редактированию DNS (у registrar или у того, куда перенесли DNS — здесь Cloudflare).
@@ -64,7 +64,7 @@
     ### Практика: A и CNAME для deployment
 
     - **Root-домен** (например `mercantec.tech`): **A-record** с именем `@` на публичный IP сервера.
-    - **Subdomain** (например `jeresprojekt.mercantec.tech`): **A-record** с именем `jeresprojekt` и IP сервера — или **CNAME** на другой host, у которого уже есть A-record (обновляете IP в одном месте).
+    - **Subdomain** (например `yourproject.mercantec.tech`): **A-record** с именем `yourproject` и IP сервера — или **CNAME** на другой host, у которого уже есть A-record (обновляете IP в одном месте).
 
     **TTL:** После сохранения records изменения распространяются от минут до 48 часов. Короткий TTL (например 300 секунд) — быстрее при смене IP, но больше DNS-запросов. Перед сменой сервера многие ставят TTL низко; потом можно поднять.
 
@@ -196,7 +196,7 @@ graph TD
     TLD3 --> SLD2["mercantec.tech"]
     SLD1 --> SUB1["www.mercantec.dk"]
     SLD1 --> SUB2["mail.mercantec.dk"]
-    SLD2 --> SUB3["jeresprojekt.mercantec.tech"]
+    SLD2 --> SUB3["yourproject.mercantec.tech"]
     SLD2 --> SUB4["gruppe2.mercantec.tech"]
 ```
 
@@ -204,7 +204,7 @@ graph TD
 
 **SLD** = Second-Level Domain (например `mercantec`)
 
-**Subdomain** = часть спереди (например `www`, `mail`, `jeresprojekt`)
+**Subdomain** = часть спереди (например `www`, `mail`, `yourproject`)
 
 ---
 
@@ -212,7 +212,7 @@ graph TD
 
 ## Полный DNS-запрос
 
-Когда вы вводите `jeresprojekt.mercantec.tech` в браузере:
+Когда вы вводите `yourproject.mercantec.tech` в браузере:
 
 ```mermaid
 sequenceDiagram
@@ -229,7 +229,7 @@ sequenceDiagram
     Ro-->>R: Спроси TLD-сервер
     R->>T: Кто знает mercantec.tech?
     T-->>R: Nameserver Cloudflare
-    R->>CF: IP для jeresprojekt.mercantec.tech?
+    R->>CF: IP для yourproject.mercantec.tech?
     CF-->>R: 192.0.2.42 (TTL: 300s)
     R-->>B: IP = 192.0.2.42
     B->>B: Сохранить в кэш (300 сек)
@@ -271,8 +271,8 @@ graph TD
     DNS --> TXT["TXT Record<br>Верификация / SPF"]
     DNS --> NS["NS Record<br>Nameserver"]
     DNS --> CAA["CAA Record<br>Разрешение SSL"]
-    A_rec --> ex1["jeresprojekt → 192.0.2.42"]
-    CNAME --> ex2["www → jeresprojekt.mercantec.tech"]
+    A_rec --> ex1["yourproject → 192.0.2.42"]
+    CNAME --> ex2["www → yourproject.mercantec.tech"]
     MX --> ex3["10 mail.provider.com"]
     TXT --> ex4["v=spf1 include:... ~all"]
 ```
@@ -286,8 +286,8 @@ graph LR
     A -->|Нет| C{"Указываете на<br>другое доменное имя?"}
     C -->|Да| D["CNAME<br>alias → домен"]
     C -->|Нет| E["TXT/MX<br>другие цели"]
-    B --> B1["Пример:<br>jeresprojekt → 192.0.2.42"]
-    D --> D1["Пример:<br>www → jeresprojekt.mercantec.tech"]
+    B --> B1["Пример:<br>yourproject → 192.0.2.42"]
+    D --> D1["Пример:<br>www → yourproject.mercantec.tech"]
 ```
 
 **Важно:** CNAME **нельзя** на root (`@`) — нужен A Record!
@@ -355,12 +355,12 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    A["Войти в Cloudflare"] --> B["Выбрать домен<br>fx mercantec.tech"]
+    A["Войти в Cloudflare"] --> B["Выбрать домен<br>e.g. mercantec.tech"]
     B --> C["DNS → Records"]
     C --> D["Add record"]
     D --> E{"Что настраиваете?"}
-    E -->|Subdomain для app| F["Type: A<br>Name: jeresprojekt<br>IPv4: din-server-ip<br>Proxy: 🟠 Proxied"]
-    E -->|Alias| G["Type: CNAME<br>Name: www<br>Target: jeresprojekt.mercantec.tech"]
+    E -->|Subdomain для app| F["Type: A<br>Name: yourproject<br>IPv4: SERVER-IP<br>Proxy: 🟠 Proxied"]
+    E -->|Alias| G["Type: CNAME<br>Name: www<br>Target: yourproject.mercantec.tech"]
     E -->|Верификация| H["Type: TXT<br>Name: @<br>Content: verify=abc123"]
     F --> I["Сохранить — через<br>несколько минут ✅"]
     G --> I
@@ -473,7 +473,7 @@ sequenceDiagram
     participant FW as 🛡️ Firewall (UFW)
     participant NGX as 🌐 Nginx
     participant APP as 🚀 Ваше приложение
-    U->>CF: https://jeresprojekt.mercantec.tech
+    U->>CF: https://yourproject.mercantec.tech
     Note over CF: DNS → IP из A-record<br>DDoS + SSL
     CF->>FW: Запрос на port 443
     Note over FW: Правило: ALLOW 443/tcp ✅
@@ -491,7 +491,7 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    START["Домен не работает 😟"] --> DNS_CHECK{"DNS на правильный IP?<br>dig jeresprojekt.mercantec.tech"}
+    START["Домен не работает 😟"] --> DNS_CHECK{"DNS на правильный IP?<br>dig yourproject.mercantec.tech"}
     DNS_CHECK -->|Нет| FIX_DNS["Исправить A-record в Cloudflare"]
     DNS_CHECK -->|Да| PING{"Доступен<br>сервер?"}
     PING -->|Нет| FW_CHECK["Проверить firewall:<br>sudo ufw status"]

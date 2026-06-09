@@ -14,7 +14,7 @@
 | [notes/day2-dns-firewall.md](./notes/day2-dns-firewall.md) | Day 2 — DNS, Cloudflare, UFW + команды |
 | [notes/day3-docker-database.md](./notes/day3-docker-database.md) | Day 3 — Docker, DB, tunnel + команды |
 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | Day 4 — Nginx, HTTPS, Certbot + команды |
-| [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | Day 5 — Reverse proxy, docs, refleksion + команды |
+| [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | Day 5 — Reverse proxy, docs, рефлексия + команды |
 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | Day 6 — Dockerfile, build, run + команды |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
@@ -58,14 +58,16 @@
 
 ### Шаблон структуры дня
 
-1. Заголовок дня (датский + русский)
+1. Заголовок дня (русский)
 2. Дневные цели
 3. Теория
 4. Практика
 5. Чеклист дня
-6. **Команды (практика)** — терминал + `#` комментарии
+6. **Команды (практика)** — терминал на **английском** + `#` комментарии на русском
 7. Короткий текст для Teams
+
+**Язык конспектов:** объяснения — **русский**; команды, Dockerfile, nginx, env — **английский**.
 
 ---
 
-*Обновлено: 2026-06-09 (app/ в repo · dev Mac · deploy Docker)*
+*Обновлено: 2026-06-09 (day1–6: язык выровнен)*

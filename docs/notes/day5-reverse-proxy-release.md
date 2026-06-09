@@ -1,4 +1,4 @@
-## Dag 5 - (12. juni) - **Release & Noter | Loadbalance, Reverse Proxy og API Gateway**
+## День 5 — (12 июня) — **Release, reverse proxy, load balancing и API gateway**
 
 - Тест полного setup
 - Документирование процесса
@@ -17,7 +17,7 @@
 
 # День 5 – Reverse Proxy, Load Balancing, API Gateway & Release
 
-> Теория к Дню 5 (12 июня). Закрепление недели 1: reverse proxy, балансировка, API gateway, **документация** и **рефлексия** перед uge 2 (.NET app, Docker Compose, CI/CD).
+> Теория к Дню 5 (12 июня). Закрепление недели 1: reverse proxy, балансировка, API gateway, **документация** и **рефлексия** перед неделя 2 (.NET app, Docker Compose, CI/CD).
 
 ---
 
@@ -91,9 +91,9 @@ graph TD
     C1[Client 1] --> LB[Load balancer]
     C2[Client 2] --> LB
     C3[Client 3] --> LB
-    LB --> A1[App instans 1 :3000]
-    LB --> A2[App instans 2 :3001]
-    LB --> A3[App instans 3 :3002]
+    LB --> A1[App instance 1 :3000]
+    LB --> A2[App instance 2 :3001]
+    LB --> A3[App instance 3 :3002]
 ```
 
 ### Алгоритмы
@@ -131,7 +131,7 @@ server {
 
 - **Scaling:** больше трафика → больше контейнеров/процессов за одним адресом
 - **Availability:** один instance упал — остальные работают
-- **Uge 2+:** несколько pod'ов / контейнеров — load balancer часто встроен в платформу
+- **неделя 2+:** несколько pod'ов / контейнеров — load balancer часто встроен в платформу
 
 ---
 
@@ -206,7 +206,7 @@ graph LR
 
 ## 5. Nginx в контексте курса
 
-### Reverse proxy для одной .NET app (uge 2 preview)
+### Reverse proxy для одной .NET app (неделя 2 preview)
 
 ```nginx
 server {
@@ -238,7 +238,7 @@ server {
 
 ### Сравнение: Day 4 vs Day 5+
 
-| | Day 4 (сейчас) | Day 5+ / uge 2 |
+| | Day 4 (сейчас) | Day 5+ / неделя 2 |
 |---|----------------|----------------|
 | Nginx role | Static file server | **Reverse proxy** + static |
 | Backend | только `root` / HTML | .NET Kestrel на `:5000` |
@@ -326,7 +326,7 @@ sequenceDiagram
 | **Services** | Postgres `127.0.0.1:5432`; app за nginx, не наружу |
 | **Secrets** | Пароли в env / SERVER_INFO, не в git |
 
-**5. Следующие шаги (uge 2)**
+**5. Следующие шаги (неделя 2)**
 
 - .NET app + `proxy_pass` на Kestrel
 - Docker Compose для app
@@ -335,7 +335,7 @@ sequenceDiagram
 
 ---
 
-## 8. Рефлексия — вопросы для Teams / aflevering
+## 8. Рефлексия — вопросы для Teams / сдачи
 
 Ответь **конкретно** (с примерами из своего деплоя):
 
@@ -370,7 +370,7 @@ flowchart LR
 | UFW | 22, 80, 443 — **не** 5432, 8080 |
 
 **Nginx сегодня:** static server на `:8080`.  
-**Nginx завтра (uge 2):** **reverse proxy** — `/` static, `/api/` → .NET.
+**Nginx завтра (неделя 2):** **reverse proxy** — `/` static, `/api/` → .NET.
 
 **Reverse proxy уже частично есть:** Cloudflare Tunnel тоже proxy между интернетом и твоим origin — но **nginx reverse proxy** нужен для routing внутри VM (static vs app vs несколько services).
 
@@ -383,7 +383,7 @@ flowchart LR
 | Entry | Nginx :443 + Certbot | Cloudflare + tunnel |
 | Reverse proxy | Nginx → app :3000 | Nginx → static *(скоро → Kestrel)* |
 | Load balance | upstream 3× app | 1 instance (теория Day 5) |
-| API gateway | path routing | `/api/` в nginx (uge 2) |
+| API gateway | path routing | `/api/` в nginx (неделя 2) |
 | HTTPS | Let's Encrypt на VM | Cloudflare edge |
 
 ---
@@ -413,7 +413,7 @@ flowchart LR
 - [x] Понимаю **следующий шаг**: .NET + `location /api/` + proxy headers  
   → `location /api/` **уже в nginx**; headers Host, X-Real-IP, X-Forwarded-For, X-Forwarded-Proto. Осталось: запустить .NET на `:5000`.
 
-- [x] Готов к **uge 2** (app container, Compose, CI/CD)  
+- [x] Готов к **неделя 2** (app container, Compose, CI/CD)  
   → Фундамент готов: VM, DB, tunnel, nginx. Дальше: .NET → Docker → Compose → GitHub Actions.
 
 ---
@@ -529,7 +529,7 @@ Browser → Cloudflare (TLS) → cloudflared → nginx:8080 → static files
 
 ### 4. Reverse proxy — подготовка конфига (когда будет .NET app)
 
-**Не применять**, пока Kestrel не слушает `:5000`. Это preview для uge 2.
+**Не применять**, пока Kestrel не слушает `:5000`. Это preview для неделя 2.
 
 ```bash
 # backup текущего конфига перед правками
@@ -640,11 +640,11 @@ curl -I http://127.0.0.1:5000/             # напрямую app
 
 ## Короткий текст для Teams (Day 5)
 
-> **Uge 1:** SSH/UFW → Docker/Postgres → Cloudflare Tunnel → Nginx :8080 (static + `/api/` proxy) → HTTPS via Cloudflare.  
-> **Reverse proxy:** CF edge + nginx `location /api/` → Kestrel :5000 (uge 2).  
+> **Неделя 1:** SSH/UFW → Docker/Postgres → Cloudflare Tunnel → Nginx :8080 (static + `/api/` proxy) → HTTPS via Cloudflare.  
+> **Reverse proxy:** CF edge + nginx `location /api/` → Kestrel :5000 (неделя 2).  
 > **Load balance / gateway:** теория; `upstream` — копии одного app; полный gateway — overkill для одного API.  
 > **Security:** SSH keys, UFW 22/80/443, DB localhost, secrets не в git, HTTPS на edge.  
-> **Sværest:** tunnel 502/530, `--network host`, IPv6 `[::1]:8080`.
+> **Сложнее всего:** tunnel 502/530, `--network host`, IPv6 `[::1]:8080`.
 
 ---
 
@@ -658,7 +658,7 @@ SSH (ключ) → VM Ubuntu (10.133.51.122, без public IP)
   → Docker: postgres (127.0.0.1:5432), cloudflared (--network host, http2)
   → Nginx на VM: 127.0.0.1:8080
        /      → /var/www/andrii (Hello World)
-       /api/  → proxy_pass 127.0.0.1:5000 (uge 2, сейчас 502)
+       /api/  → proxy_pass 127.0.0.1:5000 (неделя 2, сейчас 502)
   → Tunnel: andrii.mercantec.tech → localhost:8080
   → HTTPS: Cloudflare edge (не Certbot на VM)
 ```
@@ -746,4 +746,4 @@ SSH (ключ) → VM Ubuntu (10.133.51.122, без public IP)
 3. ✅ Рефлексия: сложное + хорошее (§5).
 4. ✅ Reverse proxy / LB / gateway + nginx (§4 + чеклист).
 5. ✅ Test setup прогнан (§6).
-6. ⬜ Uge 2: .NET на :5000 → `/api/` **200**.
+6. ⬜ неделя 2: .NET на :5000 → `/api/` **200**.
