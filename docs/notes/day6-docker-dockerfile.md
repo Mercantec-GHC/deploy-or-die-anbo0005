@@ -13,35 +13,36 @@
 
 - :theory-icon: Теория дня
 
-# День 6 – Docker: Dockerfile, build & run
+# День 6 – Docker Grundlæggende & Dockerfile
 
-> Теория к Дню 6 (15 июня). От «Docker Engine уже есть» (Day 3) к **своему image** и **app в контейнере**.
+> Теория к Дню 6 (15 июня). Docker на **сервере** (Linux) — здесь app-container будет работать в drift. Можно также практиковать локально в **Docker Desktop**; команды те же.
 
 ---
 
 ## 📚 Содержание
 
-1. Container vs VM
-2. Архитектура Docker (client, daemon, registry)
-3. Image vs container
-4. Слои (layers) и кэш
-5. Dockerfile — инструкции
+1. Containere vs virtuelle maskiner
+2. Docker-arkitektur: Client, Daemon & Registry
+3. Image og container – forskel
+4. Lag (layers) og caching
+5. Dockerfile – instruktioner
 6. `.dockerignore`
-7. Build & run workflow
-8. Volumes (кратко — Day 9 глубже)
-9. Tags и registry
-10. **Наша setup: Day 3 vs Day 6** *(andrii-deploy)*
+7. Build & Run – workflow
+8. Volumes og state (kort intro)
+9. Tags og registries
+10. Цели обучения (итог)
 
 ---
 
-## 1. Container vs VM
+## 1. Containere vs virtuelle maskiner
+
+Container — **не** маленькая VM, но используются для похожих задач.
 
 | | VM | Container |
 |---|-----|-----------|
 | Kernel | свой guest OS | **общий** kernel хоста |
-| Старт | медленно | быстро |
-| Размер | тяжёлые | легче |
 | Изоляция | сильная | process + filesystem |
+| Старт | медленно | быстро |
 
 ```mermaid
 graph TD
@@ -58,93 +59,173 @@ graph TD
     end
 ```
 
-**Проверка:** `docker run -it --rm alpine sh` → `uname -a` — kernel как на host, процессы свои.
+**Key point:** Container = **process-isolation** на том же kernel, не полноценные OS.
+
+### Kernel (ядро)
+
+**Kernel** — **ядро ОС**: «сердце» системы, управляет железом (CPU, RAM, диск, сеть) для всех программ.
+
+| | Что это |
+|---|---------|
+| **Kernel** | ядро (Linux kernel на Ubuntu) |
+| **Ubuntu** | **дистрибутив / ОС целиком** — **не** kernel |
+| **Container** | **общий** kernel с host |
+| **VM** | **свой** guest kernel |
+
+```bash
+uname -a              # kernel: Linux 6.8.0-...
+cat /etc/os-release   # дистрибутив: Ubuntu 24.04
+```
+
+### Попробуй сам
+
+1. `docker run -it --rm alpine sh`
+2. Внутри: `uname -a` и `ps aux`
+3. Сравни с `uname -a` на host — kernel тот же, список процессов другой
 
 ---
 
-## 2. Архитектура Docker
+## 2. Docker installation og verifikation
+
+На Day 6 работаете с Docker на **сервере** (Linux). Можно также тренироваться локально в Docker Desktop.
+
+**Linux (Ubuntu/Debian):**
+
+```bash
+sudo apt update
+sudo apt install docker.io
+sudo systemctl enable docker
+sudo systemctl start docker
+```
+
+**Проверка:**
+
+```bash
+docker --version
+docker run hello-world
+```
+
+- `hello-world` — минимальный image: Docker скачивает (если нужно), запускает container, печатает сообщение и завершается. Если работает — установка в порядке.
+- На сервере может понадобиться: `sudo usermod -aG docker $USER` — чтобы `docker` без `sudo`. **Выйти и зайти снова** после команды.
+
+См. также pensum: Docker Desktop vs Linux, [[Docker-grundlæggende#Installation]].
+
+---
+
+## 3. Docker-arkitektur: Client, Daemon & Registry
+
+Docker — **client-server** архитектура.
 
 ```mermaid
 graph LR
-    U[docker CLI] -->|build/run/pull| D[dockerd]
-    D -->|pull/push| R[Registry Docker Hub]
-    D --> C1[Container]
-    D --> C2[Container]
+    U[Bruger docker CLI] -->|build/run/push/pull| D[Docker Daemon]
+    D -->|pull/push images| R[Registry]
+    D --> C1[Container 1]
+    D --> C2[Container 2]
 ```
 
 | Компонент | Роль |
 |-----------|------|
-| **Client** | команды `docker ...` в терминале |
-| **Daemon (dockerd)** | build images, run containers |
+| **Docker client** | CLI (`docker ...`) |
+| **Docker daemon (dockerd)** | build images, run containers |
 | **Registry** | хранилище images (Docker Hub, GHCR) |
 
-**Flow:** `docker build` → daemon строит image · `docker run` → daemon стартует container · нет image локально → `pull`.
+**Typisk flow:**
 
-```bash
-docker version    # Client + Server
-docker info       # images, containers, storage
-```
+1. `docker build` → client просит daemon собрать image из Dockerfile
+2. `docker run` → daemon стартует container из image
+3. Image нет локально → daemon **pull** с registry (обычно Docker Hub)
+
+### Попробуй сам
+
+1. `docker version` — секции **Client** и **Server**
+2. `docker info` — число images и containers
+3. `docker run --rm hello-world` — как Docker сам тянет image
 
 ---
 
-## 3. Image vs container
+## 4. Image og container – forskel og sammenhæng
 
 | | Image | Container |
 |---|-------|-----------|
-| Что | **шаблон** (read-only) | **запущенный** экземпляр |
-| Аналогия | чертёж / рецепт | дом по чертежу |
-| Изменения | только новый `build` | RW-слой поверх image |
-| Сколько | один image | **много** containers из одного image |
+| Что | **замороженный шаблон** (read-only) | **работающий** экземпляр image |
+| Содержимое | filesystem (OS-слои, app, deps) + metadata (команда при старте) | RW-слой поверх image |
+| Примеры image | `postgres:16-alpine`, `node:20-alpine`, свой из Dockerfile | каждый `docker run` создаёт новый container |
+
+**Sammenhæng:**
+
+- **Один image** → **много containers**
+- Изменения в container **не меняют** image
+- Обновить app → **новый build** → **новый container** из нового image
+- Поэтому Dockerfile и `docker build` central на Day 6
+
+**Analogier:**
+
+- Image = blueprint / manifest
+- Container = дом по blueprint (running process)
 
 ```mermaid
 graph TD
-    I[Image read-only] --> C1[Container 1 + RW layer]
-    I --> C2[Container 2 + RW layer]
+    I[Docker Image read-only] --> C1[Container 1 image + RW-lag]
+    I --> C2[Container 2 image + RW-lag]
+    I --> C3[Container 3 image + RW-lag]
 ```
 
-```bash
-docker pull nginx
-docker run -d --name web1 nginx
-docker run -d --name web2 nginx
-docker ps          # 2 containers
-docker images      # 1 nginx image
-```
+### Попробуй сам
 
-**Важно:** изменения **в container** не меняют **image**. Обновление app = `docker build` → новый container.
+1. `docker pull nginx`
+2. `docker run -d --name web1 nginx` и `docker run -d --name web2 nginx`
+3. `docker ps` — два container, один image
+4. `docker images` — один nginx-image
 
 ---
 
-## 4. Слои и кэш
+## 5. Lag (layers) og caching
 
-Каждый шаг Dockerfile → новый **layer**. Неизменённые слои **кэшируются** при повторном build.
+Image состоит из **нескольких layers** — каждый шаг Dockerfile обычно создаёт новый layer.
+
+**Fordele:**
+
+- **Caching:** неизменённые layers переиспользуются → быстрее build
+- **Deling:** несколько images могут делить base layer (fx `ubuntu:22.04`)
+
+```mermaid
+graph TD
+    B[Base layer ubuntu:22.04] --> L1[Lag 1 apt install]
+    L1 --> L2[Lag 2 COPY kode]
+    L2 --> IMG[Image minapp:latest]
+    IMG --> C1[Container 1]
+    IMG --> C2[Container 2]
+```
 
 **Best practice:** редко меняющееся **сначала** (base, dependencies), **код — в конце**.
 
-```mermaid
-graph TD
-    B[FROM node:20-alpine] --> L1[RUN npm ci]
-    L1 --> L2[COPY app code]
-    L2 --> IMG[image:tag]
-```
+### Попробуй сам
 
-При втором `docker build` увидишь **Using cache** — быстрее.
+1. `docker build -t testimage .` два раза подряд
+2. Второй раз — **Using cache** на многих steps
+3. Измени одну строку кода, build снова — смотри где cache invalidated
 
 ---
 
-## 5. Dockerfile — инструкции
+## 6. Dockerfile – skrivning og bygge
 
-| Инструкция | Когда | Значение |
-|------------|-------|----------|
-| **FROM** | build | base image (`node:20-alpine`, `mcr.microsoft.com/dotnet/aspnet:8.0`) |
-| **WORKDIR** | build | рабочая папка внутри image |
-| **COPY** | build | файлы из build-контекста (папка `.`) в image |
-| **RUN** | build | команда при сборке (`npm ci`, `dotnet publish`) |
-| **EXPOSE** | docs | какой порт слушает app — **не открывает** порт снаружи |
-| **CMD** / **ENTRYPOINT** | start | что запустить при `docker run` |
+**Dockerfile** — пошаговое описание, как собрать image: base image, какие файлы копировать, команды при **build**, команда при **start** (CMD/ENTRYPOINT).
 
-**Build-контекст:** `docker build -t myapp:1.0 .` — точка `.` = папка с Dockerfile; `COPY` берёт файлы оттуда.
+### Grundlæggende instruktioner
 
-### Пример: Node
+| Instruktion | Betydning |
+|-------------|-----------|
+| **FROM** | Base image (fx `node:20-alpine`, `python:3.12-slim`). Всё строится поверх него |
+| **WORKDIR** | Рабочая папка в container. Дальше RUN, COPY, CMD — отсюда |
+| **COPY** | Копирует файлы из **build-kontekst** (папка `docker build`) в image |
+| **RUN** | Команда **при build** (fx `npm install`, `pip install`). Становится частью image |
+| **EXPOSE** | Документирует порт app. **Не открывает** порт — это делает `-p` при `docker run` или `ports:` в Compose |
+| **CMD** | Команда при **старте** container. Обычно одна; форма `["executable", "arg1"]` |
+
+**Build-kontekst:** `docker build -t mitimage:tag .` — **точка** = контекст (папка с Dockerfile). COPY берёт файлы оттуда. Большие папки (fx `node_modules`) исключай через **`.dockerignore`**.
+
+### Eksempel: Node-app
 
 ```dockerfile
 FROM node:20-alpine
@@ -156,7 +237,10 @@ EXPOSE 3000
 CMD ["node", "server.js"]
 ```
 
-### Пример: Python / FastAPI
+- Сначала только `package.json` + `npm ci` — layer с dependencies кэшируется, если меняется только код
+- `EXPOSE 3000` — app слушает 3000; при `docker run` используй `-p 3000:3000`
+
+### Eksempel: Python/FastAPI-app
 
 ```dockerfile
 FROM python:3.12-slim
@@ -168,322 +252,274 @@ EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-`--host 0.0.0.0` — слушать **все** interfaces внутри container (не только localhost).
+- Base с Python; сначала `requirements.txt` + install, потом код
+- `--host 0.0.0.0` — server слушает все interfaces (доступен снаружи container)
 
-### Пример: .NET *(наш путь, uge 2 preview)*
-
-```dockerfile
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY *.csproj ./
-RUN dotnet restore
-COPY . .
-RUN dotnet publish -c Release -o /app
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
-WORKDIR /app
-COPY --from=build /app .
-EXPOSE 5000
-ENV ASPNETCORE_URLS=http://0.0.0.0:5000
-CMD ["dotnet", "MyApp.dll"]
-```
-
-**Multi-stage:** build в одном слое, в runtime — только опубликованные файлы (меньше image).
+Flere detaljer og multi-stage builds: [[Dockerfile-praksis]].
 
 ---
 
-## 6. `.dockerignore`
+## 7. `.dockerignore`
 
-Как `.gitignore` — что **не** отправлять в build-контекст:
+`.dockerignore` — какие файлы **не** отправлять в daemon som build-kontekst.
+
+**Fordele:**
+
+- Mindre kontekst → hurtigere builds
+- Undgå at secrets (fx `.env`, nøgler) ender i image'et
+
+**Eksempel til Node-projekter:**
 
 ```
 .git
 node_modules
-bin
-obj
-.env*
-*.md
+npm-debug.log
+Dockerfile*
 .dockerignore
+.env*
+dist
+coverage
 ```
 
-Меньше контекст → быстрее build · secrets не попадают в image.
+### Попробуй сам
+
+1. Opret mappe `docker-demo` med simpel `server.js`
+2. Skriv Dockerfile som ovenfor
+3. Lav `.dockerignore` med mindst `node_modules` og `.git`
+4. `docker build -t docker-demo .`
+5. Smid stor mappe ind uden ignore — mærk forskellen i byggetid
 
 ---
 
-## 7. Build & run
+## 8. Build og run – workflow
+
+**Bygge image:**
 
 ```bash
 docker build -t minapp:latest .
-# -t = tag (имя:версия) · . = контекст
-
-docker run -d -p 127.0.0.1:5000:5000 --name minapp minapp:latest
-# -d фон · -p host:container · только localhost (как postgres)
-
-docker ps
-docker logs minapp
-docker stop minapp && docker rm minapp
 ```
 
-**После смены кода:** `docker build` снова → stop/rm старый container → `docker run` новый.
+- `-t minapp:latest` — **tag** (navn og version)
+- `.` — build-kontekst (nuværende mappe). Dockerfile her (eller `-f`)
 
-**Связь с nginx (Day 5):** app на `127.0.0.1:5000` → `location /api/` перестаёт давать 502.
-
----
-
-## 8. Volumes (кратко)
-
-Без volume данные в container **пропадают** при `docker rm`.
-
-| Тип | Пример | У нас |
-|-----|--------|-------|
-| **Named volume** | `-v pgdata:/var/lib/postgresql/data` | postgres Day 3 |
-| **Bind mount** | `-v ./data:/app/data` | реже на курсе |
-
-Day 9 — Compose + volumes подробнее.
-
----
-
-## 9. Tags и registry
-
-```text
-имя:тег   →   minapp:1.0.0 · minapp:latest
-```
+**Køre container:**
 
 ```bash
-docker tag minapp:latest USER/minapp:1.0.0
-docker login
-docker push USER/minapp:1.0.0
-# на другой машине:
-docker pull USER/minapp:1.0.0
+docker run -d -p 3000:3000 --name minapp-container minapp:latest
 ```
 
-Основа для CI/CD (GitHub Actions) позже.
+- `-d` — detached (baggrunden)
+- `-p 3000:3000` — host port 3000 → container 3000 → `http://localhost:3000` (eller server-IP:3000)
+- `--name` — navn til `docker stop`, `docker logs` osv.
+
+**Tjek og fejlsøgning:**
+
+```bash
+docker ps
+docker logs minapp-container
+docker exec -it minapp-container sh
+```
+
+Når I ændrer koden: **build igen** → stop/fjern gammel container → start ny fra nyt image. Senere på kurset automatiseres det med **Compose** og **Dokploy**.
+
+### Попробуй сам
+
+1. Brug Dockerfile fra forrige øvelse
+2. Byg og kør med `-p`
+3. Åbn `http://localhost:3000` (eller server-IP:3000)
+4. `docker logs` — se app output
+5. Stop og fjern container, start igen — hvad sker med logs?
 
 ---
 
-## 10. Наша setup — Day 3 vs Day 6
+## 9. Volumes og state (kort intro)
 
-| | Day 3 ✅ | Day 6 ⬜ |
-|---|----------|----------|
-| `docker.io` на VM | ✅ | проверить |
-| `hello-world` | ✅ | — |
-| `usermod -aG docker` | ✅ | — |
-| **Чужие** images (`postgres`, `cloudflared`) | ✅ | — |
-| **Свой** Dockerfile + `docker build` | — | **цель дня** |
-| App в container → nginx `:5000` | — | uge 2 |
+Container RW-lag er **midlertidigt** — slettes når container fjernes (medmindre **volumes**).
 
-**Не трогать без нужды:** `postgres`, `cloudflared`, nginx config на host.
+| Type | Eksempel |
+|------|----------|
+| **Named volume** | `pgdata` (Docker administrerer placering) |
+| **Bind mount** | `-v ./data:/path/in/container` |
 
-**Порты app на VM:** как postgres — `127.0.0.1:5000:5000`, **не** открывать 5000 в UFW.
+**Eksempel – bind mount:**
 
-```text
-Browser → CF → tunnel → nginx :8080
-                           /api/ → 127.0.0.1:5000 → container (app)
+```bash
+docker run -d \
+  -v ./data:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=hemmeligt \
+  postgres:16
 ```
 
-**Сеть:** app + postgres позже в одной **docker network** → host `postgres:5432` (не localhost из container).
+Dag 9 går dybere i volumes og Docker Compose.
+
+### Попробуй сам
+
+1. `docker run -d --name web-temp nginx`
+2. `docker exec -it web-temp sh` → `echo hej > /usr/share/nginx/html/test.html`
+3. `docker rm -f web-temp`
+4. Start ny nginx — filen er væk! Ændringer levede kun i container-laget.
+
+---
+
+## 10. Tags og registries
+
+Images identificeres som `navn:tag`, fx `node:20-alpine`.
+
+- **Navn:** ofte `brugernavn/navn` ved push til Docker Hub
+- **Tag:** version (`1.0.0`) eller miljø (`latest`, `dev`)
+
+**Typisk flow mod registry:**
+
+```bash
+docker tag minapp:latest BRUGERNAVN/minapp:1.0.0
+docker login
+docker push BRUGERNAVN/minapp:1.0.0
+
+# På en anden maskine
+docker pull BRUGERNAVN/minapp:1.0.0
+```
+
+Fundament for senere **CI/CD** (fx GitHub Actions + Dokploy).
+
+### Попробуй сам
+
+1. Opret gratis konto på [hub.docker.com](https://hub.docker.com)
+2. Byg `minapp:latest`
+3. Tag og push: `docker tag minapp:latest DITNAVN/minapp:0.1` · `docker push DITNAVN/minapp:0.1`
+4. På anden maskine/server: `docker pull DITNAVN/minapp:0.1` og kør
 
 ---
 
 # Чеклист целей обучения
 
-> ⬜ Day 6 — Dockerfile + первая своя app в container
+> ⬜ Day 6 — simpel app i container
 
-- [ ] Docker на VM работает (`docker --version`, `hello-world` или уже было Day 3)
-- [ ] Понимаю **image** vs **container**
-- [ ] Понимаю **client / daemon / registry**
-- [ ] Написал **Dockerfile** (FROM, WORKDIR, COPY, RUN, EXPOSE, CMD)
-- [ ] Есть **`.dockerignore`**
-- [ ] `docker build -t ... .` успешен
-- [ ] `docker run -d -p 127.0.0.1:PORT:PORT ...` — container Up
-- [ ] `curl` на порт app → **200** (или ответ API)
-- [ ] (опционально) `curl http://127.0.0.1:8080/api/...` через nginx → не 502
+- [ ] Installere Docker og verificere (`docker run hello-world`)
+- [ ] Forklare **image** vs **container** (skabelon vs instans; ét image, mange containere)
+- [ ] Beskrive **client, daemon, registry** og flow build/run/pull
+- [ ] Skrive Dockerfile med FROM, WORKDIR, COPY, RUN, EXPOSE, CMD
+- [ ] Bruge **`.dockerignore`**
+- [ ] `docker build -t ... .` og `docker run -d -p ...`
+- [ ] `docker ps`, `docker logs`, `docker exec`
+- [ ] Forklare **layers/caching** og hvorfor rækkefølge i Dockerfile betyder noget
+- [ ] Kort forstå **volumes** (data overlever container)
 
 ---
 
 ## Команды (практика)
 
-> SSH: `mercantec-andrii` · не ломать postgres/cloudflared · секреты не в image
+> Day 6 på **serveren** (Linux). Samme kommandoer virker i Docker Desktop lokalt.
 
 ---
 
-### 0. Проверка Docker (Day 3 — повтор)
+### 1. Installation og verifikation
 
 ```bash
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo systemctl status docker
+
 docker --version
-docker info | head -20
-docker ps
-# postgres · cloudflared Up
+docker run hello-world
+# Hello from Docker!
 
-groups
-# должна быть docker — иначе: sudo usermod -aG docker andrii && re-login
-
-docker run --rm hello-world
-# Hello from Docker! — OK
+sudo usermod -aG docker $USER
+# log ud og ind igen — derefter docker uden sudo
 ```
 
 ---
 
-### 1. Минимальный пример — свой image (Node или static)
-
-На VM в домашней папке:
+### 2. Dockerfile – Node-app (fra pensum)
 
 ```bash
-mkdir -p ~/docker-demo && cd ~/docker-demo
+mkdir -p docker-demo && cd docker-demo
+# opret package.json, server.js, Dockerfile, .dockerignore — se §6–7
 ```
 
-**`server.js`:**
-
-```javascript
-const http = require('http');
-const port = 3000;
-http.createServer((req, res) => {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello from Docker container\n');
-}).listen(port, '0.0.0.0');
-```
-
-**`Dockerfile`:**
+**Dockerfile (pensum):**
 
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
-COPY server.js .
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
 EXPOSE 3000
 CMD ["node", "server.js"]
 ```
 
-**`.dockerignore`:**
-
-```
-.git
-node_modules
-```
-
 ```bash
-docker build -t docker-demo:latest .
-# успех → image docker-demo:latest
+docker build -t minapp:latest .
+docker run -d -p 3000:3000 --name minapp-container minapp:latest
 
-docker run -d --name docker-demo -p 127.0.0.1:3000:3000 docker-demo:latest
+docker ps
+docker logs minapp-container
+curl http://localhost:3000
+# eller http://SERVER-IP:3000
 
-curl http://127.0.0.1:3000/
-# Hello from Docker container
-
-docker logs docker-demo
-docker stop docker-demo && docker rm docker-demo
+docker stop minapp-container
+docker rm minapp-container
 ```
 
 ---
 
-### 2. .NET app в container *(когда будет проект — uge 2)*
+### 3. Dockerfile – Python/FastAPI (pensum)
+
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
 
 ```bash
-cd ~/my-dotnet-app   # папка с .csproj
-
-# Dockerfile — см. §5 multi-stage выше
-
-docker build -t andrii-app:latest .
-
-docker run -d \
-  --name andrii-app \
-  -p 127.0.0.1:5000:5000 \
-  --restart unless-stopped \
-  andrii-app:latest
-
-curl -I http://127.0.0.1:5000/weatherforecast
-curl -I http://127.0.0.1:8080/api/weatherforecast
-# второй — через nginx (Day 5 location /api/)
+docker build -t fastapi-app:latest .
+docker run -d -p 8000:8000 --name fastapi-container fastapi-app:latest
+curl http://localhost:8000
 ```
-
-**Connection string к БД из container** (позже, docker network):
-
-```text
-Host=postgres;Port=5432;...
-```
-
-не `localhost` — имя service/container.
 
 ---
 
-### 3. Отладка build / run
+### 4. Image vs container – demo
 
 ```bash
+docker pull nginx
+docker run -d --name web1 nginx
+docker run -d --name web2 nginx
+docker ps
 docker images
-# список local images
-
-docker ps -a
-# Exited — смотри docker logs
-
-docker logs CONTAINER --tail 50
-
-docker exec -it CONTAINER sh
-# внутри container: ls, env, curl localhost:PORT
-
-docker build --no-cache -t myapp:latest .
-# игнорировать cache — если что-то «залипло»
-
-docker rm -f CONTAINER
-docker rmi IMAGE
-# удалить container / image
 ```
 
 ---
 
-### 4. Image vs container — учебная демонстрация
+### 5. Registry (valgfrit)
 
 ```bash
-docker run -d -p 127.0.0.1:8888:80 --name web-temp nginx:alpine
-docker exec web-temp sh -c 'echo test > /usr/share/nginx/html/test.html'
-curl http://127.0.0.1:8888/test.html
-# test
-
-docker rm -f web-temp
-docker run -d -p 127.0.0.1:8888:80 --name web-temp2 nginx:alpine
-curl -I http://127.0.0.1:8888/test.html
-# 404 — файл жил только в RW-слое старого container, не в image
-```
-
----
-
-### Типичные ошибки
-
-| Симптом | Причина | Действие |
-|---------|---------|----------|
-| `permission denied` docker.sock | не в группе docker | `usermod -aG docker` · re-login |
-| `COPY failed` | файла нет в контексте | путь · `.dockerignore` |
-| container Exited сразу | CMD падает | `docker logs` |
-| curl connection refused | app слушает 127.0.0.1 внутри | `0.0.0.0` в CMD |
-| 502 на `/api/` | app не на :5000 | `docker ps` · `-p 127.0.0.1:5000:5000` |
-| image огромный | без multi-stage / node_modules в COPY | `.dockerignore` · multi-stage |
-
----
-
-### Docker — шпаргалка Day 6
-
-```bash
-docker build -t NAME:TAG .          # собрать image
-docker run -d -p 127.0.0.1:H:C ...  # запустить container
-docker ps / docker ps -a
-docker logs NAME
-docker stop NAME && docker rm NAME
-docker images
-docker exec -it NAME sh
+docker tag minapp:latest BRUGERNAVN/minapp:1.0.0
+docker login
+docker push BRUGERNAVN/minapp:1.0.0
 ```
 
 ---
 
 ## Короткий текст для Teams (Day 6)
 
-> **Docker Day 6:** Image = skabelon, container = kørende instans. Dockerfile: FROM, COPY, RUN, EXPOSE, CMD. `docker build` + `docker run -p`.  
-> **Day 3:** Docker + postgres/cloudflared allerede kørende. **Day 6:** første **eget** image.  
-> **Næste:** .NET i container på :5000 → nginx `/api/` (allerede i config).
+> **Day 6 Docker:** Image = skabelon, container = kørende instans. Dockerfile: FROM, WORKDIR, COPY, RUN, EXPOSE, CMD. `docker build -t minapp .` og `docker run -d -p 3000:3000`. `.dockerignore` for hurtigere og sikrere build. Volumes — data overlever container (Dag 9).
 
 ---
 
-## Цели обучения (итог)
+## Læringsmål (opsummering)
 
-1. Docker установлен и проверен (`hello-world`).
-2. Dockerfile написан и image собран.
-3. Image vs container объяснены (шаблон vs инстанс; один image — много containers).
-4. Build & run с портом на localhost.
-5. ⬜ Связать app container с nginx `/api/` (uge 2).
+Efter Dag 6 skal I kunne:
+
+1. **Installere Docker** på en server og verificere (fx `docker run hello-world`).
+2. **Skrive og bygge Dockerfile** til simpel app (FROM, WORKDIR, COPY, RUN, EXPOSE, CMD — og `.dockerignore`).
+3. **Forklare forskellen** på image og container og sammenhængen (image = skabelon, container = instans; ét image, mange containere; ændringer i container ændrer ikke image).
+4. **Beskrive Docker-arkitekturen** (client, daemon, registry) og hvordan build, run, pull og push hænger sammen.
+5. **Bygge image og køre container** der eksponerer en port og kan tilgås udefra.
+6. **Forklare hvorfor lag og caching** betyder noget for build-tid og image-størrelse.

@@ -18,6 +18,7 @@
 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | Day 6 — Dockerfile, build, run + команды |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
+| [WORKFLOW.md](./WORKFLOW.md) | Правила: кто что делает · чеклист перед commit |
 | [DEPLOY_RESULTS_LOG.md](./DEPLOY_RESULTS_LOG.md) | Короткий лог результатов по дням (без команд) |
 
 ---
@@ -31,8 +32,10 @@
 | 3 | [notes/day3-docker-database.md](./notes/day3-docker-database.md) | ✅ complete |
 | 4 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | ✅ nginx VM · Hello World · :8080 |
 | 5 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | ✅ docs · `/api/` в nginx |
-| 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ⬜ Dockerfile + app container |
+| 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ⬜ теория · Dockerfile после .NET |
 | 7–15 | `notes/dayN-....md` | по мере прохождения |
+
+**Следующая практика:** `app/MercantecApi` на Mac → Docker на VM — [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) · [WORKFLOW.md](./WORKFLOW.md)
 
 ---
 
@@ -65,4 +68,4 @@
 
 ---
 
-*Обновлено: 2026-06-08 (Day 4 ✅ · GitHub pushed)*
+*Обновлено: 2026-06-09 (app/ в repo · dev Mac · deploy Docker)*

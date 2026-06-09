@@ -13,13 +13,24 @@
 | 3 | Docker, PostgreSQL, tunnel | ✅ |
 | 4 | Nginx на VM, static site | ✅ (Certbot на VM ⬜ — HTTPS от Cloudflare) |
 | 5 | Reverse proxy, docs, refleksion | ✅ |
-| 6 | Dockerfile, app в container | ⬜ в notes |
+| 6 | Dockerfile, app в container | ⬜ теория в notes |
+| — | **ASP.NET Web API** (`app/`) | ⬜ dev на Mac · deploy Docker |
+
+## Структура репо
+
+```text
+docs/     — конспекты и handoff
+app/      — ASP.NET Web API + Dockerfile (создашь)
+```
+
+**Dev на Mac** → `git push` → **VM:** `git pull` + `docker run`
 
 ## Документы
 
 | Файл | Назначение |
 |------|------------|
 | [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md) | Resume между сессиями |
+| [docs/WORKFLOW.md](docs/WORKFLOW.md) | Workflow · commit checklist |
 | [docs/DOCS_INDEX.md](docs/DOCS_INDEX.md) | Индекс документации |
 | [docs/DEPLOY_RESULTS_LOG.md](docs/DEPLOY_RESULTS_LOG.md) | Лог результатов по дням |
 | [docs/notes/day1-ssh.md](docs/notes/day1-ssh.md) | Day 1 — теория + команды |
@@ -33,6 +44,7 @@
 
 ## Стек на VM
 
-- **На сервере:** SSH, UFW, Docker Engine, Nginx (`:8080` → tunnel)
-- **В Docker:** `postgres`, `cloudflared`
+- **На сервере:** SSH, UFW, Docker Engine, Nginx (`:8080` → tunnel · `/api/` → `:5000`)
+- **В Docker:** `postgres`, `cloudflared` · позже `mercantec-api`
+- **App (plan):** `app/MercantecApi/` — Web API в этом репо
 - **Доступ:** Cloudflare Tunnel (нет public IP)

@@ -2,3 +2,12 @@ MY_NOTES.md
 SERVER_INFO.md
 .DS_Store
 .cursor/
+
+# .NET / app/
+app/**/bin/
+app/**/obj/
+app/**/.vs/
+*.user
+*.suo
+appsettings.*.local.json
+**/secrets.json

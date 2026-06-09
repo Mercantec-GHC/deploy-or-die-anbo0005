@@ -1,0 +1,6 @@
+@MercantecApi_HostAddress = http://localhost:5048
+
+GET {{MercantecApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

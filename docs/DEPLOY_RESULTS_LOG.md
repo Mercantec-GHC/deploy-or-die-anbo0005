@@ -82,10 +82,6 @@
 
 ---
 
-*Обновлено: 2026-06-08 · Day 4 ✅ · next: .NET app / Day 5+*
-
----
-
 ## Day 4 — Nginx на VM, static site ✅
 
 ### Nginx (на хосте, не Docker) ✅
@@ -115,3 +111,31 @@
 - Теория: HTTP→HTTPS redirect, auto-renewal — для устного
 
 ---
+
+## Day 5 — Reverse proxy, dokumentation ✅
+
+### nginx `/api/` ✅
+
+- В `/etc/nginx/sites-available/andrii.mercantec.tech` добавлен `location /api/` → `proxy_pass http://127.0.0.1:5000/`
+- Proxy headers: `Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`
+- Backup конфига: `andrii.mercantec.tech.bak.20260609`
+- `nginx -t` + reload — OK
+
+### Проверка ✅ / ожидаемо ⬜
+
+- `curl http://127.0.0.1:8080/` → **200** (static)
+- `curl http://127.0.0.1:8080/api/` → **502** — нормально, Kestrel на :5000 ещё нет
+- `https://andrii.mercantec.tech` → **200** (иногда **530** — tunnel reconnect)
+
+### Dokumentation + refleksion ✅
+
+- Компоненты и request flow — в `docs/notes/day5-reverse-proxy-release.md`
+- Чеклист дня отмечен
+
+### Следующее ⬜
+
+- ASP.NET Core Web API · SDK 8 на VM · Kestrel `:5000`
+
+---
+
+*Обновлено: 2026-06-09 · Day 5 ✅ · next: ASP.NET Web API*
