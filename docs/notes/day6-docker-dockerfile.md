@@ -453,7 +453,19 @@ docker pull USERNAME/minapp:1.0.0
 | **git ≠ running app**  | Правки в `~/GitHub/...` не меняют container. Нужны: `git pull` → `docker build` → `docker stop/rm` → `docker run`.                    |
 | **RW-layer**           | Правки **внутри** container (`docker exec`) — временные; после `docker rm` пропадают. Image меняется только через `docker build`.     |
 | **docker push**        | Для одной VM **не нужен** — достаточно `git push` кода; image собирается локально на сервере.                                         |
+| **Порты**              | nginx VM **8080** · Docker VM **5000** · Kestrel container **3000** · postgres **5432** (app к БД позже).                            |
 
+
+### Трафик client → API (MercantecApi)
+
+```text
+Client → HTTPS Cloudflare → tunnel → nginx :8080
+  /api/... → proxy_pass 127.0.0.1:5000/ → Docker → container :3000 → JSON
+```
+
+- **8080** и **3000** — разные порты (nginx на VM vs app в container)
+- **5000** — мост Docker на VM; nginx про **3000** не знает
+- **5432** — postgres; из container `127.0.0.1` ≠ VM (подключение app — позже)
 
 **Deploy после изменения кода:**
 

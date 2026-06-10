@@ -95,9 +95,9 @@ test curl localhost                                   docker run → :5000
 
 ## Следующая задача
 
-1. **Day 6 ✅** — `mercantec-api` на VM · `/api/weatherforecast` **200**
-2. Публичная проверка `https://andrii.mercantec.tech/api/weatherforecast`
-3. Day 7+ по программе курса
+1. **Day 6 ✅** — `mercantec-api` · порты 8080/5000/3000 · домен `/api/weatherforecast` **200**
+2. Day 7+ по программе курса
+3. App ↔ postgres — отложено
 
 Детали: `docs/SESSION_HANDOFF.md`
 
@@ -111,4 +111,4 @@ test curl localhost                                   docker run → :5000
 
 ---
 
-*Обновлено: 2026-06-09 · Day 6 deploy ✅ · mercantec-api на VM*
+*Обновлено: 2026-06-10 · Day 6 ✅ · трафик/порты в MY_NOTES + day6*

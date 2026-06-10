@@ -54,7 +54,7 @@ deploy-or-die-anbo0005/
 |-----------|--------|
 | `postgres` | Docker · `127.0.0.1:5432` |
 | `cloudflared` | Docker · `--network host` |
-| **`mercantec-api`** | Docker · `127.0.0.1:5000→8080` · **Up** |
+| **`mercantec-api`** | Docker · `127.0.0.1:5000→3000` · **Up** |
 | **nginx** | `:8080` static + **`/api/` → :5000** · weatherforecast **200** |
 | **.NET SDK на VM (хост)** | ❌ не установлен — только в Docker images |
 
@@ -73,6 +73,24 @@ deploy-or-die-anbo0005/
 | `3000` | внутри container — Kestrel (`ASPNETCORE_URLS=http://+:3000`) |
 
 nginx на VM **`8080`** (tunnel) · app в container **`3000`** — разные порты.
+
+## Трафик client → container (кратко)
+
+```text
+Client → HTTPS Cloudflare → tunnel → nginx VM :8080
+  /           → static /var/www/andrii/
+  /api/...    → proxy :5000 → Docker → container :3000 → Kestrel
+```
+
+| Порт | Кто слушает | С интернета? |
+|------|-------------|--------------|
+| 443 | Cloudflare | ✅ client |
+| 8080 | nginx (VM) | ❌ tunnel only |
+| 5000 | Docker → API (VM) | ❌ |
+| 3000 | Kestrel (container) | ❌ |
+| 5432 | Docker → postgres | ❌ · app пока не подключена |
+
+**`127.0.0.1` в container ≠ VM** — postgres с app позже через network / `host.docker.internal`.
 
 ---
 
@@ -122,5 +140,5 @@ curl http://127.0.0.1:8080/api/weatherforecast
 
 ## Следующее ⬜
 
-- Проверка публичного URL `/api/weatherforecast`
 - Day 7+ по программе курса
+- App ↔ postgres (endpoint `/Health/db`) — **отложено**

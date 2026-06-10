@@ -152,19 +152,29 @@
 - `docker build -t mercantec-api .` — OK
 - Images: `mcr.microsoft.com/dotnet/sdk:8.0`, `aspnet:8.0`, `mercantec-api:latest`
 - Container **`mercantec-api`** — **Up** · `-p 127.0.0.1:5000:3000` · `--restart unless-stopped`
-- Container ID: `fc753af9ee99...`
+- Kestrel в container **:3000** (не 8080 — чтобы не путать с nginx :8080 на VM)
 - **.NET SDK на хосте VM** — нет (только внутри Docker build/runtime)
 
 ### Проверка ✅
 
-- `curl http://127.0.0.1:5000/weatherforecast` → **200** JSON (напрямую в container)
-- `curl http://127.0.0.1:8080/api/weatherforecast` → **200** JSON (через nginx `/api/`)
+- `curl http://127.0.0.1:5000/weatherforecast` → **200** JSON (Docker :5000 → container :3000)
+- `curl http://127.0.0.1:8080/api/weatherforecast` → **200** JSON (nginx `/api/`)
+- `https://andrii.mercantec.tech/api/weatherforecast` → **200** JSON (через CF + tunnel)
+
+### Порты (итог Day 6)
+
+| Порт | Где | Роль |
+|------|-----|------|
+| 8080 | nginx на VM | tunnel origin · static + `/api/` |
+| 5000 | Docker на VM | nginx → mercantec-api |
+| 3000 | внутри mercantec-api | Kestrel |
+| 5432 | Docker → postgres | БД · app **не** подключена |
 
 ### Следующее ⬜
 
-- Публичная проверка `https://andrii.mercantec.tech/api/weatherforecast`
 - Day 7+ по программе курса
+- App ↔ postgres — отложено
 
 ---
 
-*Обновлено: 2026-06-09 · Day 6 ✅ · API в Docker на :5000*
+*Обновлено: 2026-06-10 · Day 6 ✅ · порты 8080/5000/3000*
