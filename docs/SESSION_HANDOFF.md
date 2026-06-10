@@ -62,7 +62,7 @@ deploy-or-die-anbo0005/
 
 ---
 
-## Порт `-p 127.0.0.1:5000:8080` (кратко)
+## Порт `-p 127.0.0.1:5000:3000` (кратко)
 
 Формат: **`хост_IP : порт_на_VM : порт_внутри_container`**
 
@@ -70,9 +70,9 @@ deploy-or-die-anbo0005/
 |-------|----------|
 | `127.0.0.1` | слушать только localhost VM (не из интернета) |
 | `5000` | снаружи container — сюда стучится nginx (`proxy_pass :5000`) |
-| `8080` | внутри container — Kestrel (`ASPNETCORE_URLS=http://+:8080`) |
+| `3000` | внутри container — Kestrel (`ASPNETCORE_URLS=http://+:3000`) |
 
-nginx `:8080` — **другой** порт (tunnel → static + `/api/`). Не путать с `8080` внутри container.
+nginx на VM **`8080`** (tunnel) · app в container **`3000`** — разные порты.
 
 ---
 
@@ -84,7 +84,7 @@ git pull
 cd app/MercantecApi
 docker build -t mercantec-api .
 docker stop mercantec-api && docker rm mercantec-api
-docker run -d --name mercantec-api -p 127.0.0.1:5000:8080 --restart unless-stopped mercantec-api
+docker run -d --name mercantec-api -p 127.0.0.1:5000:3000 --restart unless-stopped mercantec-api
 curl http://127.0.0.1:5000/weatherforecast
 curl http://127.0.0.1:8080/api/weatherforecast
 curl https://andrii.mercantec.tech/api/weatherforecast

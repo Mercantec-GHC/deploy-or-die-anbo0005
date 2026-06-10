@@ -38,11 +38,13 @@
 
 Container — **не** маленькая VM, но используются для похожих задач.
 
-| | VM | Container |
-|---|-----|-----------|
-| Kernel | свой guest OS | **общий** kernel хоста |
-| Изоляция | сильная | process + filesystem |
-| Старт | медленно | быстро |
+
+|          | VM            | Container              |
+| -------- | ------------- | ---------------------- |
+| Kernel   | свой guest OS | **общий** kernel хоста |
+| Изоляция | сильная       | process + filesystem   |
+| Старт    | медленно      | быстро                 |
+
 
 ```mermaid
 graph TD
@@ -59,18 +61,22 @@ graph TD
     end
 ```
 
+
+
 **Главное:** container = **изоляция процессов** на том же kernel, не полноценная ОС.
 
 ### Kernel (ядро)
 
 **Kernel** — **ядро ОС**: «сердце» системы, управляет железом (CPU, RAM, диск, сеть) для всех программ.
 
-| | Что это |
-|---|---------|
-| **Kernel** | ядро (Linux kernel на Ubuntu) |
-| **Ubuntu** | **дистрибутив / ОС целиком** — **не** kernel |
-| **Container** | **общий** kernel с host |
-| **VM** | **свой** guest kernel |
+
+|               | Что это                                      |
+| ------------- | -------------------------------------------- |
+| **Kernel**    | ядро (Linux kernel на Ubuntu)                |
+| **Ubuntu**    | **дистрибутив / ОС целиком** — **не** kernel |
+| **Container** | **общий** kernel с host                      |
+| **VM**        | **свой** guest kernel                        |
+
 
 ```bash
 uname -a              # kernel: Linux 6.8.0-...
@@ -124,11 +130,15 @@ graph LR
     D --> C2[Container 2]
 ```
 
-| Компонент | Роль |
-|-----------|------|
-| **Docker client** | CLI (`docker ...`) |
+
+
+
+| Компонент                   | Роль                                  |
+| --------------------------- | ------------------------------------- |
+| **Docker client**           | CLI (`docker ...`)                    |
 | **Docker daemon (dockerd)** | собирает images, запускает containers |
-| **Registry** | хранилище images (Docker Hub, GHCR) |
+| **Registry**                | хранилище images (Docker Hub, GHCR)   |
+
 
 **Типичный flow:**
 
@@ -146,11 +156,13 @@ graph LR
 
 ## 4. Image и container — разница и связь
 
-| | Image | Container |
-|---|-------|-----------|
-| Что | **замороженный шаблон** (read-only) | **работающий** экземпляр image |
-| Содержимое | filesystem (OS-слои, app, deps) + metadata (команда при старте) | RW-слой поверх image |
-| Примеры image | `postgres:16-alpine`, `node:20-alpine`, свой из Dockerfile | каждый `docker run` создаёт новый container |
+
+|               | Image                                                           | Container                                   |
+| ------------- | --------------------------------------------------------------- | ------------------------------------------- |
+| Что           | **замороженный шаблон** (read-only)                             | **работающий** экземпляр image              |
+| Содержимое    | filesystem (OS-слои, app, deps) + metadata (команда при старте) | RW-слой поверх image                        |
+| Примеры image | `postgres:16-alpine`, `node:20-alpine`, свой из Dockerfile      | каждый `docker run` создаёт новый container |
+
 
 **Связь:**
 
@@ -170,6 +182,8 @@ graph TD
     I --> C2[Container 2 image + RW-layer]
     I --> C3[Container 3 image + RW-layer]
 ```
+
+
 
 **RW-layer** (read-write) — тонкий writable-слой у каждого container поверх read-only image. Image общий; записи внутри container — в своём слое.
 
@@ -200,6 +214,8 @@ graph TD
     IMG --> C2[Container 2]
 ```
 
+
+
 **Best practice:** редко меняющееся **сначала** (base, dependencies), **код — в конце**.
 
 ### Попробуй сам
@@ -216,16 +232,18 @@ graph TD
 
 ### Основные инструкции
 
-| Инструкция | Значение |
-|------------|----------|
-| **FROM** | Base image (например `node:20-alpine`, `python:3.12-slim`). Всё строится поверх него |
-| **WORKDIR** | Рабочая папка в container. Дальше RUN, COPY, CMD — отсюда |
-| **COPY** | Копирует файлы из **build context** (папка `docker build`) в image |
-| **RUN** | Команда **при build** (например `npm install`, `pip install`). Становится частью image |
-| **EXPOSE** | Документирует порт app. **Не открывает** порт — это делает `-p` при `docker run` или `ports:` в Compose |
-| **CMD** | Команда при **старте** container. Обычно одна; форма `["executable", "arg1"]` |
 
-**Build context:** `docker build -t myimage:tag .` — **точка** = контекст (папка с Dockerfile). COPY берёт файлы оттуда. Большие папки (например `node_modules`) исключай через **`.dockerignore`**.
+| Инструкция  | Значение                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| **FROM**    | Base image (например `node:20-alpine`, `python:3.12-slim`). Всё строится поверх него                    |
+| **WORKDIR** | Рабочая папка в container. Дальше RUN, COPY, CMD — отсюда                                               |
+| **COPY**    | Копирует файлы из **build context** (папка `docker build`) в image                                      |
+| **RUN**     | Команда **при build** (например `npm install`, `pip install`). Становится частью image                  |
+| **EXPOSE**  | Документирует порт app. **Не открывает** порт — это делает `-p` при `docker run` или `ports:` в Compose |
+| **CMD**     | Команда при **старте** container. Обычно одна; форма `["executable", "arg1"]`                           |
+
+
+**Build context:** `docker build -t myimage:tag .` — **точка** = контекст (папка с Dockerfile). COPY берёт файлы оттуда. Большие папки (например `node_modules`) исключай через `**.dockerignore`**.
 
 ### Пример: Node-app
 
@@ -347,10 +365,12 @@ docker exec -it minapp-container sh
 
 RW-layer container **временный** — удаляется вместе с container (если нет **volumes**).
 
-| Тип | Пример |
-|-----|--------|
+
+| Тип              | Пример                                        |
+| ---------------- | --------------------------------------------- |
 | **Named volume** | `pgdata` (Docker сам выбирает место на диске) |
-| **Bind mount** | `-v ./data:/path/in/container` |
+| **Bind mount**   | `-v ./data:/path/in/container`                |
+
 
 **Пример — bind mount:**
 
@@ -409,12 +429,41 @@ docker pull USERNAME/minapp:1.0.0
 - [x] Объяснить **image** vs **container**
 - [x] Описать **client, daemon, registry** и flow build/run/pull
 - [x] Написать Dockerfile с FROM, WORKDIR, COPY, RUN, EXPOSE, CMD
-- [x] Использовать **`.dockerignore`**
-- [x] `docker build -t mercantec-api .` и `docker run -d -p 127.0.0.1:5000:8080`
+- [x] Использовать `**.dockerignore`**
+- [x] `docker build -t mercantec-api .` и `docker run -d -p 127.0.0.1:5000:3000`
 - [x] Проверка: `curl :5000/weatherforecast` и `:8080/api/weatherforecast` → **200**
 - [ ] `docker ps`, `docker logs`, `docker exec` — по желанию повторить
 - [x] Layers/caching — в Dockerfile (restore до COPY кода)
 - [ ] Volumes для app — Day 9
+
+---
+
+## Ключевые идеи (простыми словами)
+
+> MercantecApi — шпаргалка после практики на VM.
+
+
+| Идея                   | Коротко                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Mac vs VM**          | Mac: `dotnet run` (разработка). VM: `docker build` + `docker run` (deploy).                                                           |
+| **SDK vs runtime**     | **SDK** собирает app из `.cs` (build). **Runtime** запускает готовый `.dll` (run).                                                    |
+| **Три «склада»**       | **git** = твой код · **Docker registry** = готовые images (sdk, aspnet, postgres) · **NuGet** = библиотеки .NET при `dotnet restore`. |
+| **Где .NET на VM**     | **Image** лежит на диске VM (`/var/lib/docker/`). `dotnet` **не** установлен на Ubuntu — только внутри image/container.               |
+| **Image vs container** | **Image** = упаковка (dll + runtime). **Container** = запущенный процесс + тонкий RW-layer + логи.                                    |
+| **git ≠ running app**  | Правки в `~/GitHub/...` не меняют container. Нужны: `git pull` → `docker build` → `docker stop/rm` → `docker run`.                    |
+| **RW-layer**           | Правки **внутри** container (`docker exec`) — временные; после `docker rm` пропадают. Image меняется только через `docker build`.     |
+| **docker push**        | Для одной VM **не нужен** — достаточно `git push` кода; image собирается локально на сервере.                                         |
+
+
+**Deploy после изменения кода:**
+
+```bash
+cd ~/GitHub/deploy-or-die-anbo0005/app/MercantecApi
+git pull
+docker build -t mercantec-api .                    # старый container ещё может работать
+docker stop mercantec-api && docker rm mercantec-api
+docker run -d --name mercantec-api -p 127.0.0.1:5000:3000 --restart unless-stopped mercantec-api
+```
 
 ---
 
@@ -505,7 +554,8 @@ curl http://localhost:8000
 cd ~/GitHub/deploy-or-die-anbo0005/app/MercantecApi
 git pull
 docker build -t mercantec-api .
-docker run -d --name mercantec-api -p 127.0.0.1:5000:8080 --restart unless-stopped mercantec-api
+docker stop mercantec-api && docker rm mercantec-api
+docker run -d --name mercantec-api -p 127.0.0.1:5000:3000 --restart unless-stopped mercantec-api
 
 curl http://127.0.0.1:5000/weatherforecast
 curl http://127.0.0.1:8080/api/weatherforecast   # через nginx
@@ -554,4 +604,4 @@ docker push USERNAME/minapp:1.0.0
 
 ---
 
-*Обновлено: 2026-06-09 — текст на русском; команды и конфиги на английском*
+*Обновлено: 2026-06-10 — ключевые идеи Day 6; команды redeploy*

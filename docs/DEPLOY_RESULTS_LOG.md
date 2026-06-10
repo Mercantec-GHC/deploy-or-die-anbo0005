@@ -151,7 +151,7 @@
 - Repo на VM: `~/GitHub/deploy-or-die-anbo0005` · `git pull`
 - `docker build -t mercantec-api .` — OK
 - Images: `mcr.microsoft.com/dotnet/sdk:8.0`, `aspnet:8.0`, `mercantec-api:latest`
-- Container **`mercantec-api`** — **Up** · `-p 127.0.0.1:5000:8080` · `--restart unless-stopped`
+- Container **`mercantec-api`** — **Up** · `-p 127.0.0.1:5000:3000` · `--restart unless-stopped`
 - Container ID: `fc753af9ee99...`
 - **.NET SDK на хосте VM** — нет (только внутри Docker build/runtime)
 
