@@ -16,6 +16,7 @@
 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | Day 4 — Nginx, HTTPS, Certbot + команды |
 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | Day 5 — Reverse proxy, docs, рефлексия + команды |
 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | Day 6 — Dockerfile, build, run + команды |
+| [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | Day 7 — Compose, app+db, env + команды |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
 | [WORKFLOW.md](./WORKFLOW.md) | Правила: кто что делает · чеклист перед commit |
@@ -33,9 +34,10 @@
 | 4 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | ✅ nginx VM · Hello World · :8080 |
 | 5 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | ✅ docs · `/api/` в nginx |
 | 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ✅ Dockerfile · `mercantec-api` на VM |
-| 7–15 | `notes/dayN-....md` | по мере прохождения |
+| 7 | [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | ⬜ теория · Compose app+db |
+| 8–15 | `notes/dayN-....md` | по мере прохождения |
 
-**Следующая практика:** Day 7+ · публичный `/api/` — [SESSION_HANDOFF.md](./SESSION_HANDOFF.md)
+**Следующая практика:** Day 7 — `docker-compose.yml` app+db — [notes/day7-docker-compose.md](./notes/day7-docker-compose.md)
 
 ---
 
@@ -51,6 +53,7 @@
 - `day4-nginx-https.md`
 - `day5-reverse-proxy-release.md`
 - `day6-docker-dockerfile.md`
+- `day7-docker-compose.md`
 - ...
 - `day15-aflevering-fremlaeggelse.md`
 
@@ -70,4 +73,4 @@
 
 ---
 
-*Обновлено: 2026-06-10 · Day 6 ✅ · порты/трафик в notes*
+*Обновлено: 2026-06-10 · Day 7 конспект добавлен*

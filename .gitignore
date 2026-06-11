@@ -11,3 +11,4 @@ app/**/.vs/
 *.suo
 appsettings.*.local.json
 **/secrets.json
+app/**/.env

@@ -1,0 +1,98 @@
+# Список services (контейнеров), которые Compose поднимает вместе
+services:
+
+  # ── Service: database (имя "db" = hostname внутри Compose-сети) ──
+  db:
+
+    # Готовый image с Docker Hub — свой Dockerfile для postgres не нужен
+    image: postgres:16-alpine
+
+    # Переменные для инициализации postgres при первом старте
+    environment:
+
+      # Имя пользователя БД — значение из .env (${DB_USER})
+      POSTGRES_USER: ${DB_USER}
+
+      # Пароль — из .env, не хардкодить в git
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+      # Имя базы данных — из .env (${DB_NAME})
+      POSTGRES_DB: ${DB_NAME}
+
+    # Проброс порта: Ubuntu:5432 → container:5432 (только localhost VM)
+    ports:
+      - "127.0.0.1:5432:5432"
+
+    # Данные БД на named volume — переживают docker compose down
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+    # Автоперезапуск после reboot VM (как docker run --restart unless-stopped)
+    restart: unless-stopped
+
+    # Проверка: postgres готов принимать подключения?
+    healthcheck:
+
+      # pg_isready — стандартная проверка «БД жива»
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+
+      # Как часто проверять
+      interval: 5s
+
+      # Сколько ждать ответа одной проверки
+      timeout: 5s
+
+      # Сколько неудач подряд до status unhealthy
+      retries: 5
+
+  # ── Service: MercantecApi (собирается из Dockerfile в этой папке) ──
+  app:
+
+    # Сборка custom image (не image: с Docker Hub)
+    build:
+
+      # Папка build context — отсюда COPY в Dockerfile (вся MercantecApi/)
+      context: .
+
+      # Какой файл-рецепт читать (если один — всё равно можно писать явно)
+      dockerfile: Dockerfile
+
+    # Проброс: Ubuntu:5000 → container:3000 (nginx /api/ стучится в :5000)
+    ports:
+      - "127.0.0.1:5000:3000"
+
+    # Подтянуть переменные из файла .env (только на Mac/VM, не в git)
+    env_file:
+      - .env
+
+    # Переменные окружения внутри container app
+    environment:
+
+      # Kestrel слушает :3000 на всех interfaces внутри container
+      ASPNETCORE_URLS: http://+:3000
+
+      # Production — без Swagger (как в Dockerfile Day 6)
+      ASPNETCORE_ENVIRONMENT: Production
+
+      # Строка подключения к БД: Host=db — имя service, НЕ localhost
+      ConnectionStrings__Postgres: "Host=db;Port=5432;Username=${DB_USER};Password=${DB_PASSWORD};Database=${DB_NAME}"
+
+    # app стартует только после того, как db прошёл healthcheck
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # Автоперезапуск после reboot VM
+    restart: unless-stopped
+
+# Объявление volumes верхнего уровня
+volumes:
+
+  # Имя volume в этом compose-файле
+  pgdata:
+
+    # volume уже создан на Day 3 — не создавать новый, переиспользовать
+    external: true
+
+    # Реальное имя volume на диске VM (docker volume ls)
+    name: pgdata
