@@ -1,0 +1,28 @@
+# Имя workflow — отображается в GitHub → Actions
+name: CI
+
+# Когда запускать workflow (события)
+on:
+  # При push в main
+  push:
+    branches: ["main"]
+  # При pull request в main (например, перед merge)
+  pull_request:
+    branches: ["main"]
+
+# Jobs — группы steps, могут выполняться параллельно
+jobs:
+  # Один job: собрать Docker image
+  build-docker:
+    # Запуск на Linux-runner GitHub (временная VM в облаке)
+    runs-on: ubuntu-latest
+
+    # Steps выполняются по порядку — останавливаются на первой ошибке
+    steps:
+      # Скачать код репо на runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Собрать image из Dockerfile (тот же, что на VM / Day 6)
+      - name: Build MercantecApi Docker image
+        run: docker build -t mercantec-api:ci -f app/MercantecApi/Dockerfile app/MercantecApi
