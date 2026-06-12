@@ -95,9 +95,9 @@ test curl localhost                                   docker run → :5000
 
 ## Следующая задача
 
-1. **Day 6 ✅** — `mercantec-api` · порты 8080/5000/3000 · домен `/api/weatherforecast` **200**
-2. Day 7+ по программе курса
-3. App ↔ postgres — отложено
+1. **Day 7 ✅** — compose `app`+`db` · `pgdata` · домен `/api/weatherforecast` **200**
+2. **Day 8 ⬜** — volumes/persistence · `pg_dump` · CI (GitHub Actions) · Dokploy — [day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md)
+3. `/Health/db` в коде — опционально
 
 Детали: `docs/SESSION_HANDOFF.md`
 

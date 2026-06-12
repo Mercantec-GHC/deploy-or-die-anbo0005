@@ -16,7 +16,8 @@
 - Вход по паролю по SSH — **выключен** (`PasswordAuthentication no`)
 - `sshd` — **active (running)** (был в образе Ubuntu, мы настроили)
 - **Host key VM (OK):** `SHA256:MFyp...` — только его принимать
-- **Известная проблема:** иногда тот же IP отвечает `SHA256:P4Z...` — keyscan перед входом
+- **Известная проблема:** иногда тот же IP отвечает чужой ключ — `SHA256:P4Z...` или `SHA256:UjhJSXHEy...` (2026-06-10) — **keyscan перед входом**, не `yes` на не-MFyp
+- **IP VM:** выдавался `.122` · после reboot 2026-06-11 → **`.121`** (`~/.ssh/config` HostName)
 
 ---
 
@@ -170,11 +171,47 @@
 | 3000 | внутри mercantec-api | Kestrel |
 | 5432 | Docker → postgres | БД · app **не** подключена |
 
-### Следующее ⬜
+### Следующее ✅ (Day 7)
 
-- Day 7+ по программе курса
-- App ↔ postgres — отложено
+- Docker Compose — см. Day 7
 
 ---
 
-*Обновлено: 2026-06-10 · Day 6 ✅ · порты 8080/5000/3000*
+## Day 7 — Docker Compose (app + db) ✅
+
+### Repo + VM setup ✅
+
+- `docker-compose.yml` + `.env.example` + `.gitignore` (`app/**/.env`)
+- Commit `ecaad70` — Compose setup
+- VM: `apt install docker-compose-v2` (плагин `docker compose`)
+- `.env` на VM вручную (не в git)
+
+### Миграция с отдельных containers ✅
+
+- `docker stop/rm mercantec-api postgres` (volume `pgdata` сохранён)
+- `docker compose up -d --build` в `app/MercantecApi/`
+- Network: `mercantecapi_default`
+- Containers: **`mercantecapi-db-1`** (healthy) · **`mercantecapi-app-1`**
+- `cloudflared` — **не трогали** · Up
+
+### Проверка ✅
+
+- `docker compose ps` — db **healthy**, app **Up**
+- `docker compose exec db psql ... SELECT 1` → **OK**
+- `curl :5000/weatherforecast` → **200**
+- `curl :8080/api/weatherforecast` → **200**
+- `https://andrii.mercantec.tech/api/weatherforecast` → **200**
+
+### Env / сеть
+
+- `ConnectionStrings__Postgres` в env app: `Host=db` (Compose DNS)
+- App **пока не читает** строку в коде — endpoint `/Health/db` ⬜ (опционально)
+
+### Следующее ⬜
+
+- Day 8+ по программе курса
+- `/Health/db` в коде — опционально
+
+---
+
+*Обновлено: 2026-06-10 · Day 7 ✅ · Day 8 ⬜ · IP .121 · SSH keyscan MFyp*

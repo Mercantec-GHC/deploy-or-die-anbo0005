@@ -612,17 +612,18 @@ volumes:
 
 # Чеклист целей обучения
 
-> ⬜ Day 7 — в работе
+> ✅ Day 7 — выполнено (2026-06-11)
 
-- [ ] Написать `docker-compose.yml` с **db** + **app** (image/build, ports, volumes, `depends_on`)
-- [ ] Настроить **environment** / **env_file** — app читает DB config; host = **`db`**
-- [ ] Объяснить, зачем Compose лучше множества `docker run`
-- [ ] `docker compose up -d --build` на VM
-- [ ] `docker compose ps` — оба services Up; health `db` healthy
-- [ ] Проверка API: `curl :5000/weatherforecast`, `:8080/api/...`
+- [x] Написать `docker-compose.yml` с **db** + **app** (image/build, ports, volumes, `depends_on`)
+- [x] Настроить **environment** / **env_file** — host = **`db`** (env в compose; код `/Health/db` ⬜)
+- [x] Объяснить, зачем Compose лучше множества `docker run`
+- [x] `docker compose up -d --build` на VM
+- [x] `docker compose ps` — оба Up; health **`db` healthy** (healthcheck только на db, не на app)
+- [x] Проверка API: `curl :5000`, `:8080/api/`, домен — **200**
 - [ ] (Опционально) endpoint `/Health/db` → **200** при живой БД
-- [ ] `.env` в `.gitignore`; пароли не в репозитории
-- [ ] `cloudflared` и nginx на VM — по-прежнему работают после миграции
+- [x] `.env` в `.gitignore`; пароли не в репозитории; `.env` на VM вручную
+- [x] `cloudflared` и nginx — работают после миграции
+- [x] `apt install docker-compose-v2` на VM
 
 ---
 
@@ -768,4 +769,4 @@ docker run -d --name mercantec-api \
 
 ---
 
-*Обновлено: 2026-06-10 — теория Day 7; чеклист и практика под MercantecApi*
+*Обновлено: 2026-06-11 — Day 7 ✅ практика на VM (compose app+db)*

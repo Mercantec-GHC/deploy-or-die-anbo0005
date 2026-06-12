@@ -13,17 +13,19 @@
 | 3 | Docker, PostgreSQL, tunnel | ✅ |
 | 4 | Nginx на VM, static site | ✅ (Certbot на VM ⬜ — HTTPS от Cloudflare) |
 | 5 | Reverse proxy, docs, refleksion | ✅ |
-| 6 | Dockerfile, app в container | ✅ `mercantec-api` на VM |
-| — | **ASP.NET Web API** (`app/MercantecApi/`) | ✅ Mac dev · Docker deploy |
+| 6 | Dockerfile, app в container | ✅ |
+| 7 | Docker Compose (app + db) | ✅ `docker compose` на VM |
+| 8 | Volumes, persistence, CI/CD, Dokploy | ⬜ теория · backup · Actions |
+| — | **ASP.NET Web API** (`app/MercantecApi/`) | ✅ Mac dev · Compose deploy |
 
 ## Структура репо
 
 ```text
 docs/     — конспекты и handoff
-app/MercantecApi/  — ASP.NET Web API + Dockerfile
+app/MercantecApi/  — ASP.NET Web API + Dockerfile + docker-compose.yml
 ```
 
-**Dev на Mac** → `git push` → **VM:** `git pull` + `docker run`
+**Dev на Mac** → `git push` → **VM:** `git pull` + `docker compose up -d --build`
 
 ## Документы
 
@@ -39,12 +41,15 @@ app/MercantecApi/  — ASP.NET Web API + Dockerfile
 | [docs/notes/day4-nginx-https.md](docs/notes/day4-nginx-https.md) | Day 4 |
 | [docs/notes/day5-reverse-proxy-release.md](docs/notes/day5-reverse-proxy-release.md) | Day 5 |
 | [docs/notes/day6-docker-dockerfile.md](docs/notes/day6-docker-dockerfile.md) | Day 6 |
+| [docs/notes/day7-docker-compose.md](docs/notes/day7-docker-compose.md) | Day 7 |
+| [docs/notes/day8-volumes-cicd-dokploy.md](docs/notes/day8-volumes-cicd-dokploy.md) | Day 8 |
 
 **Private (не в git):** `SERVER_INFO.md` · `MY_NOTES.md` — см. `.gitignore`
 
 ## Стек на VM
 
 - **На сервере:** SSH, UFW, Docker Engine, Nginx (`:8080` → tunnel · `/api/` → `:5000`)
-- **В Docker:** `postgres`, `cloudflared`, **`mercantec-api`** (`127.0.0.1:5000→8080`)
+- **Compose:** `mercantecapi-app-1` + `mercantecapi-db-1` (`:5000` / `:5432`)
+- **В Docker (вне compose):** `cloudflared`
 - **App:** `app/MercantecApi/` — Web API · `/api/weatherforecast` через nginx
 - **Доступ:** Cloudflare Tunnel (нет public IP)

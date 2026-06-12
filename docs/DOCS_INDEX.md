@@ -17,6 +17,7 @@
 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | Day 5 — Reverse proxy, docs, рефлексия + команды |
 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | Day 6 — Dockerfile, build, run + команды |
 | [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | Day 7 — Compose, app+db, env + команды |
+| [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md) | Day 8 — Volumes, persistence, CI/CD, Dokploy |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
 | [WORKFLOW.md](./WORKFLOW.md) | Правила: кто что делает · чеклист перед commit |
@@ -34,10 +35,11 @@
 | 4 | [notes/day4-nginx-https.md](./notes/day4-nginx-https.md) | ✅ nginx VM · Hello World · :8080 |
 | 5 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | ✅ docs · `/api/` в nginx |
 | 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ✅ Dockerfile · `mercantec-api` на VM |
-| 7 | [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | ⬜ теория · Compose app+db |
-| 8–15 | `notes/dayN-....md` | по мере прохождения |
+| 7 | [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | ✅ Compose app+db на VM |
+| 8 | [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md) | ⬜ теория · volumes · CI/CD |
+| 9–15 | `notes/dayN-....md` | по мере прохождения |
 
-**Следующая практика:** Day 7 — `docker-compose.yml` app+db — [notes/day7-docker-compose.md](./notes/day7-docker-compose.md)
+**Следующая практика:** Day 8 — volumes, backup, GitHub Actions / Dokploy — [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md)
 
 ---
 
@@ -54,6 +56,7 @@
 - `day5-reverse-proxy-release.md`
 - `day6-docker-dockerfile.md`
 - `day7-docker-compose.md`
+- `day8-volumes-cicd-dokploy.md`
 - ...
 - `day15-aflevering-fremlaeggelse.md`
 
@@ -73,4 +76,4 @@
 
 ---
 
-*Обновлено: 2026-06-10 · Day 7 конспект добавлен*
+*Обновлено: 2026-06-10 · Day 7 ✅ · Day 8 конспект · следующая практика — backup + CI*
