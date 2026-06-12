@@ -1,5 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Day 8 full CI/CD flow test marker (2026-06-12)
+
 // Add services to the container.
 
 builder.Services.AddControllers();
