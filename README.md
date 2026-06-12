@@ -15,7 +15,7 @@
 | 5 | Reverse proxy, docs, refleksion | ✅ |
 | 6 | Dockerfile, app в container | ✅ |
 | 7 | Docker Compose (app + db) | ✅ `docker compose` на VM |
-| 8 | Volumes, persistence, CI/CD, Dokploy | ⬜ теория · backup · Actions |
+| 8 | Volumes, persistence, CI/CD, Dokploy | ✅ CI · Dokploy CD (webhook test) |
 | — | **ASP.NET Web API** (`app/MercantecApi/`) | ✅ Mac dev · Compose deploy |
 
 ## Структура репо
@@ -25,7 +25,7 @@ docs/     — конспекты и handoff
 app/MercantecApi/  — ASP.NET Web API + Dockerfile + docker-compose.yml
 ```
 
-**Dev на Mac** → `git push` → **VM:** `git pull` + `docker compose up -d --build`
+**Dev на Mac** → `git push` → **CI:** GitHub Actions · **CD:** Dokploy webhook → compose deploy
 
 ## Документы
 
