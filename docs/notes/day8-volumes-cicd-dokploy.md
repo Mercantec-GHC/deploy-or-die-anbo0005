@@ -19,10 +19,10 @@
 
 ### CI/CD & Dokploy
 
-4. Я могу объяснить, что такое **CI/CD** и зачем оно нужно
-5. Я понимаю структуру **GitHub Actions**: workflow, event, job, step, runner
-6. Я могу описать, как **Dokploy** подключается к GitHub (repo + webhook) и деплоит после push
-7. Я понимаю разделение: **CI** (GitHub Actions — build/test) · **CD** (Dokploy — deploy на сервер)
+1. Я могу объяснить, что такое **CI/CD** и зачем оно нужно
+2. Я понимаю структуру **GitHub Actions**: workflow, event, job, step, runner
+3. Я могу описать, как **Dokploy** подключается к GitHub (repo + webhook) и деплоит после push
+4. Я понимаю разделение: **CI** (GitHub Actions — build/test) · **CD** (Dokploy — deploy на сервер)
 
 - :theory-icon: Теория дня
 
@@ -65,10 +65,14 @@ graph TD
     V --> D["/var/lib/docker/volumes/pgdata/_data на VM"]
 ```
 
-| Тип | Кто задаёт путь на хосте | Типичное использование |
-| --- | --- | --- |
-| **Named volume** | Docker | БД, persistent data |
-| **Bind mount** | Ты (`./data:/path`) | dev config, static, логи на хосте |
+
+
+
+| Тип              | Кто задаёт путь на хосте | Типичное использование            |
+| ---------------- | ------------------------ | --------------------------------- |
+| **Named volume** | Docker                   | БД, persistent data               |
+| **Bind mount**   | Ты (`./data:/path`)      | dev config, static, логи на хосте |
+
 
 ---
 
@@ -104,24 +108,28 @@ volumes:
 
 ### Сравнение
 
-| | Named volume | Bind mount |
-| --- | --- | --- |
-| Путь на VM | Docker выбирает | Ты указываешь |
-| БД postgres | ✅ стандарт | реже |
-| Static nginx на VM | — | ✅ (у тебя nginx через `apt`, не mount) |
-| `compose down` | volume **остаётся** | папка на хосте **остаётся** |
+
+|                    | Named volume        | Bind mount                             |
+| ------------------ | ------------------- | -------------------------------------- |
+| Путь на VM         | Docker выбирает     | Ты указываешь                          |
+| БД postgres        | ✅ стандарт          | реже                                   |
+| Static nginx на VM | —                   | ✅ (у тебя nginx через `apt`, не mount) |
+| `compose down`     | volume **остаётся** | папка на хосте **остаётся**            |
+
 
 ---
 
 ## 3. Data persistence — что переживает что
 
-| Действие | Container | Named volume `pgdata` |
-| --- | --- | --- |
-| `docker restart` | тот же | ✅ данные на месте |
-| `docker compose restart db` | тот же | ✅ |
-| `docker compose down` | удалены | ✅ volume остаётся |
-| `docker rm` + новый container с тем же `-v pgdata` | новый | ✅ |
-| `docker volume rm pgdata` | — | ❌ **данные удалены** |
+
+| Действие                                           | Container | Named volume `pgdata` |
+| -------------------------------------------------- | --------- | --------------------- |
+| `docker restart`                                   | тот же    | ✅ данные на месте     |
+| `docker compose restart db`                        | тот же    | ✅                     |
+| `docker compose down`                              | удалены   | ✅ volume остаётся     |
+| `docker rm` + новый container с тем же `-v pgdata` | новый     | ✅                     |
+| `docker volume rm pgdata`                          | —         | ❌ **данные удалены**  |
+
 
 ```bash
 # проверить volume
@@ -155,11 +163,13 @@ cat backup.sql | docker compose exec -T db psql -U andrii -d postgres
 
 ### Стратегии (обзор)
 
-| Стратегия | Идея |
-| --- | --- |
-| **Регулярный pg_dump** | cron на VM · файл на диск / S3 |
-| **Snapshot volume** | бэкап на уровне диска VM (провайдер) |
-| **Dokploy / скрипты** | автоматизация после deploy |
+
+| Стратегия              | Идея                                 |
+| ---------------------- | ------------------------------------ |
+| **Регулярный pg_dump** | cron на VM · файл на диск / S3       |
+| **Snapshot volume**    | бэкап на уровне диска VM (провайдер) |
+| **Dokploy / скрипты**  | автоматизация после deploy           |
+
 
 Глубже backup в Dokploy — **Day 9** по программе.
 
@@ -169,12 +179,14 @@ cat backup.sql | docker compose exec -T db psql -U andrii -d postgres
 
 Day 7: Compose создал `mercantecapi_default` — **bridge**-сеть.
 
-| Концепция | У тебя |
-| --- | --- |
-| Service name = DNS | `db` → postgres container |
-| Изоляция | app видит `db`, не видит random container |
-| Host network | `cloudflared --network host` — **не** compose-сеть |
-| Порты на VM | `5000`, `5432` — проброс **наружу** compose-сети для nginx / psql |
+
+| Концепция          | У тебя                                                            |
+| ------------------ | ----------------------------------------------------------------- |
+| Service name = DNS | `db` → postgres container                                         |
+| Изоляция           | app видит `db`, не видит random container                         |
+| Host network       | `cloudflared --network host` — **не** compose-сеть                |
+| Порты на VM        | `5000`, `5432` — проброс **наружу** compose-сети для nginx / psql |
+
 
 ```text
 Compose-сеть (внутренняя):
@@ -204,6 +216,8 @@ graph LR
     CD --> Prod[VM containers]
 ```
 
+
+
 **Без CI/CD (Day 7 сейчас):**
 
 ```text
@@ -225,13 +239,15 @@ Dokploy: pull image / compose up (CD)
 
 Файлы: `.github/workflows/*.yml` в репо.
 
-| Термин | Значение |
-| --- | --- |
-| **Workflow** | один YAML-сценарий |
-| **Event** | что запускает (`push`, `pull_request`) |
-| **Job** | группа steps на одном runner |
-| **Step** | команда или action |
-| **Runner** | VM GitHub (`ubuntu-latest`) или self-hosted |
+
+| Термин       | Значение                                    |
+| ------------ | ------------------------------------------- |
+| **Workflow** | один YAML-сценарий                          |
+| **Event**    | что запускает (`push`, `pull_request`)      |
+| **Job**      | группа steps на одном runner                |
+| **Step**     | команда или action                          |
+| **Runner**   | VM GitHub (`ubuntu-latest`) или self-hosted |
+
 
 ```yaml
 name: CI
@@ -260,6 +276,8 @@ sequenceDiagram
     R->>R: checkout build test
     R-->>G: success or failed
 ```
+
+
 
 ---
 
@@ -311,11 +329,13 @@ jobs:
 
 **Dokploy** — self-hosted **PaaS**: веб-UI на **твоём** сервере для deploy из Git.
 
-| Без Dokploy | С Dokploy |
-| --- | --- |
-| SSH + ручные команды | Web UI + webhook |
+
+| Без Dokploy               | С Dokploy              |
+| ------------------------- | ---------------------- |
+| SSH + ручные команды      | Web UI + webhook       |
 | Каждый сам помнит compose | Проект привязан к repo |
-| Один workflow на команду | Воспроизводимый deploy |
+| Один workflow на команду  | Воспроизводимый deploy |
+
 
 **Может:**
 
@@ -342,8 +362,8 @@ jobs:
 2. Первый вход в web UI · admin user
 3. **New Project** → тип Docker / Docker Compose
 4. Подключить GitHub repo (`Mercantec-GHC/deploy-or-die-anbo0005`)
-   - публичный repo — проще
-   - приватный — **PAT** или **Deploy Key**
+  - публичный repo — проще
+  - приватный — **PAT** или **Deploy Key**
 5. Branch: `main`
 6. Путь к compose: `app/MercantecApi/docker-compose.yml`
 7. Env/secrets в UI Dokploy (не в git) — `DB_PASSWORD` и т.д.
@@ -354,11 +374,13 @@ jobs:
 
 **В GitHub:** Repo → Settings → Webhooks → Add webhook
 
-| Поле | Значение |
-| --- | --- |
-| Payload URL | URL из Dokploy |
+
+| Поле         | Значение           |
+| ------------ | ------------------ |
+| Payload URL  | URL из Dokploy     |
 | Content type | `application/json` |
-| Events | Push |
+| Events       | Push               |
+
 
 **Демо:** маленькое изменение → push → в Dokploy «Building» → сайт обновился **без SSH**.
 
@@ -383,12 +405,14 @@ jobs:
 
 ## 11. CI vs CD в нашем курсе
 
-| Часть | Инструмент | Где |
-| --- | --- | --- |
-| **CI** | GitHub Actions | build, test, push image |
-| **CD** | Dokploy | deploy на VM, volumes, restart |
-| **Секреты** | GitHub Secrets + Dokploy env | не в коде |
-| **Ручной fallback** | ssh + compose | всегда можно откатиться |
+
+| Часть               | Инструмент                   | Где                            |
+| ------------------- | ---------------------------- | ------------------------------ |
+| **CI**              | GitHub Actions               | build, test, push image        |
+| **CD**              | Dokploy                      | deploy на VM, volumes, restart |
+| **Секреты**         | GitHub Secrets + Dokploy env | не в коде                      |
+| **Ручной fallback** | ssh + compose                | всегда можно откатиться        |
+
 
 ```mermaid
 graph TD
@@ -401,6 +425,8 @@ graph TD
     DOK --> VM[VM app plus db]
     NGX[Nginx plus tunnel] --> VM
 ```
+
+
 
 **У тебя сейчас:** CI/CD **не** настроен — deploy вручную. Day 8 = теория + практика по указанию teacher.
 
@@ -419,13 +445,17 @@ flowchart TD
     D -->|Yes| H[Live]
 ```
 
-| Ошибка | Решение |
-| --- | --- |
-| Tag mismatch (`:main` vs `:latest`) | Одинаковый tag в Actions и Dokploy |
-| Неверный `api_token` | Secrets в GitHub |
-| Image private | GHCR public или credentials в Dokploy |
-| БД пустая после deploy | Volume mapping в Dokploy / `external: pgdata` |
-| Сайт 502 | container down · tunnel · nginx |
+
+
+
+| Ошибка                              | Решение                                       |
+| ----------------------------------- | --------------------------------------------- |
+| Tag mismatch (`:main` vs `:latest`) | Одинаковый tag в Actions и Dokploy            |
+| Неверный `api_token`                | Secrets в GitHub                              |
+| Image private                       | GHCR public или credentials в Dokploy         |
+| БД пустая после deploy              | Volume mapping в Dokploy / `external: pgdata` |
+| Сайт 502                            | container down · tunnel · nginx               |
+
 
 ---
 
@@ -433,23 +463,27 @@ flowchart TD
 
 ### Уже есть ✅
 
-| Компонент | Статус |
-| --- | --- |
-| Named volume `pgdata` | Day 3 → Day 7 `external: true` |
-| Compose app + db | `mercantecapi-app-1`, `mercantecapi-db-1` |
-| `.env` на VM вручную | пароли не в git |
-| nginx + tunnel | вне compose |
-| Ручной deploy | `git pull` + `compose up` |
+
+| Компонент             | Статус                                    |
+| --------------------- | ----------------------------------------- |
+| Named volume `pgdata` | Day 3 → Day 7 `external: true`            |
+| Compose app + db      | `mercantecapi-app-1`, `mercantecapi-db-1` |
+| `.env` на VM вручную  | пароли не в git                           |
+| nginx + tunnel        | вне compose                               |
+| Ручной deploy         | `git pull` + `compose up`                 |
+
 
 ### Day 8 — что добавить (по программе)
 
-| Задача | Действие |
-| --- | --- |
+
+| Задача             | Действие                                            |
+| ------------------ | --------------------------------------------------- |
 | Понять persistence | `compose down` / `volume inspect` — данные на месте |
-| Backup | `pg_dump` в файл |
-| CI workflow | `.github/workflows/ci.yml` — build Dockerfile |
-| Dokploy | по инструкции teacher (если для группы) |
-| Webhook | push → auto deploy |
+| Backup             | `pg_dump` в файл                                    |
+| CI workflow        | `.github/workflows/ci.yml` — build Dockerfile       |
+| Dokploy            | по инструкции teacher (если для группы)             |
+| Webhook            | push → auto deploy                                  |
+
 
 > **Volumes в Dokploy:** при deploy указать тот же `pgdata` или volume в UI — иначе **новая** пустая БД.
 
@@ -513,17 +547,19 @@ ls -la ~/backup_*.sql
 
 ## Ключевые идеи (простыми словами)
 
-| Идея | Коротко |
-| --- | --- |
-| **Volume** | данные **вне** container layer |
-| **Named volume** | Docker хранит · `pgdata` |
-| **Bind mount** | твой путь на хосте |
+
+| Идея               | Коротко                              |
+| ------------------ | ------------------------------------ |
+| **Volume**         | данные **вне** container layer       |
+| **Named volume**   | Docker хранит · `pgdata`             |
+| **Bind mount**     | твой путь на хосте                   |
 | **`compose down`** | containers ушли · volume **остался** |
-| **`volume rm`** | ⚠️ удалит данные |
-| **CI** | автоматический build/test на push |
-| **CD** | автоматический deploy (Dokploy) |
-| **Dokploy** | PaaS на своей VM · webhook из GitHub |
-| **Ручной deploy** | всё ещё валидный fallback |
+| **`volume rm`**    | ⚠️ удалит данные                     |
+| **CI**             | автоматический build/test на push    |
+| **CD**             | автоматический deploy (Dokploy)      |
+| **Dokploy**        | PaaS на своей VM · webhook из GitHub |
+| **Ручной deploy**  | всё ещё валидный fallback            |
+
 
 ---
 

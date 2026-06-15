@@ -18,6 +18,9 @@
 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | Day 6 — Dockerfile, build, run + команды |
 | [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | Day 7 — Compose, app+db, env + команды |
 | [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md) | Day 8 — Volumes, persistence, CI/CD, Dokploy |
+| [notes/day9-kubernetes-dokploy.md](./notes/day9-kubernetes-dokploy.md) | Day 9 — Kubernetes/K3s, volumes, Dokploy, GitHub |
+| [notes/day10-monitoring-logging.md](./notes/day10-monitoring-logging.md) | Day 10 — Monitoring, logging, Uptime Kuma |
+| [notes/day11-owasp-security-headers.md](./notes/day11-owasp-security-headers.md) | Day 11 — OWASP Top 10, security headers |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
 | [WORKFLOW.md](./WORKFLOW.md) | Правила: кто что делает · чеклист перед commit |
@@ -36,10 +39,13 @@
 | 5 | [notes/day5-reverse-proxy-release.md](./notes/day5-reverse-proxy-release.md) | ✅ docs · `/api/` в nginx |
 | 6 | [notes/day6-docker-dockerfile.md](./notes/day6-docker-dockerfile.md) | ✅ Dockerfile · `mercantec-api` на VM |
 | 7 | [notes/day7-docker-compose.md](./notes/day7-docker-compose.md) | ✅ Compose app+db на VM |
-| 8 | [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md) | ⬜ теория · volumes · CI/CD |
-| 9–15 | `notes/dayN-....md` | по мере прохождения |
+| 8 | [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md) | ✅ CI/CD · Dokploy |
+| 9 | [notes/day9-kubernetes-dokploy.md](./notes/day9-kubernetes-dokploy.md) | ✅ теория · backup |
+| 10 | [notes/day10-monitoring-logging.md](./notes/day10-monitoring-logging.md) | ✅ Dokploy logs · Uptime Kuma |
+| 11 | [notes/day11-owasp-security-headers.md](./notes/day11-owasp-security-headers.md) | ✅ теория · nginx headers |
+| 12–15 | `notes/dayN-....md` | по мере прохождения |
 
-**Следующая практика:** Day 8 — volumes, backup, GitHub Actions / Dokploy — [notes/day8-volumes-cicd-dokploy.md](./notes/day8-volumes-cicd-dokploy.md)
+**Следующая практика:** Day 11 — OWASP + security headers в nginx — [notes/day11-owasp-security-headers.md](./notes/day11-owasp-security-headers.md)
 
 ---
 
@@ -57,6 +63,9 @@
 - `day6-docker-dockerfile.md`
 - `day7-docker-compose.md`
 - `day8-volumes-cicd-dokploy.md`
+- `day9-kubernetes-dokploy.md`
+- `day10-monitoring-logging.md`
+- `day11-owasp-security-headers.md`
 - ...
 - `day15-aflevering-fremlaeggelse.md`
 

@@ -209,9 +209,116 @@
 
 ### Следующее ⬜
 
-- Day 8+ по программе курса
 - `/Health/db` в коде — опционально
 
 ---
 
-*Обновлено: 2026-06-10 · Day 7 ✅ · Day 8 ⬜ · IP .121 · SSH keyscan MFyp*
+## Day 8 — Volumes, CI/CD, Dokploy ✅
+
+### GitHub Actions (CI) ✅
+
+- `.github/workflows/ci.yml` — `docker build` на push/PR `main`
+- Первый push workflow: scope `workflow` (`gh auth refresh -s workflow`)
+- Проверка: GitHub → Actions → **CI** green (~30s)
+
+### Dokploy (CD) ✅
+
+- Install на VM · Swarm · UI `andriidokploy.mercantec.tech` :3000
+- Project **MercantecApi** · Git tab + PAT · `main` · `app/MercantecApi/docker-compose.yml`
+- Env `DB_*` · volume **`pgdata`** external
+- Autodeploy **ON**
+- Webhook: Content-Type **`application/json`** (не `form` → 301 Branch Not Match)
+- Push → webhook **200** → redeploy ~1 min
+
+### Проверка ✅
+
+- `curl :5000/weatherforecast` · `:8080/api/` · домен **200**
+- CI + CD full flow tested (2026-06-12)
+
+### Tunnel ⚠️
+
+- Иногда webhook **530** при живом `cloudflared` → `docker restart cloudflared`
+
+---
+
+## Day 9 — Volumes, K8s теория, backup ✅
+
+### Volumes & persistence ✅
+
+- `pgdata` named volume · path `/var/lib/docker/volumes/pgdata/_data`
+- `docker restart mercantecapi-sdn21v-db-1` → `SELECT 1` OK (2026-06-15)
+
+### Backup ✅
+
+- `pg_dump` → `/home/andrii/backup_20260615.sql`
+
+### Kubernetes / K3s ⬜ (теория)
+
+- Pod, Deployment, Service, Ingress, PVC — конспект `day9-kubernetes-dokploy.md`
+- Proxi demo — не на своей VM
+- Свой stack: Compose + Dokploy (не K3s)
+
+### Dokploy + GitHub
+
+- Уже закрыто на Day 8 ✅
+
+### Следующее ⬜
+
+- Revoke/rotate GitHub PAT (был на скринах)
+- NIS2/CRA устно (Day 2)
+
+---
+
+## Day 10 — Monitoring, logging, Uptime Kuma ✅
+
+### Dokploy monitoring & logs ✅
+
+- Открыты **Logs** app container `mercantecapi-sdn21v-app-1` — ASP.NET startup OK
+- Предупреждение HTTPS redirect за reverse proxy — нормально (tunnel + nginx)
+
+### Uptime Kuma ✅
+
+- Отдельный container на VM · **не** в app compose (как `cloudflared`)
+- Image `louislam/uptime-kuma` · port `127.0.0.1:3001` · volume `uptime-kuma-data`
+- UI: SSH `-L 3001:127.0.0.1:3001` → `http://localhost:3001`
+- Admin создан · monitor **Mercantec API**
+
+### Monitor ✅
+
+- URL: `https://andrii.mercantec.tech/api/weatherforecast`
+- Type HTTP(s) · GET · interval 60s · retries 1 · auth None
+- Статус: **Up** · **200 OK** · ~164 ms (2026-06-15)
+
+### Идея Day 10
+
+- **Dokploy** = внутри VM (status, logs container)
+- **Uptime Kuma** = снаружи (ping публичного URL, весь путь tunnel → nginx → app)
+
+### Следующее ⬜
+
+- (Опционально) тест Down: `docker stop` app → Kuma red → `docker start`
+- Prometheus/Grafana — теория в конспекте, на VM не ставили
+
+---
+
+## Day 11 — OWASP Top 10, security headers ✅ (частично)
+
+### Теория ✅
+
+- Конспект `day11-owasp-security-headers.md` — OWASP A01–A10, headers, input validation, security review
+
+### Security headers в nginx ✅
+
+- Backup → `/etc/nginx/sites-available/andrii.mercantec.tech.bak.20260615`
+- Добавлены: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- `nginx -t` + reload OK
+- `curl -I https://andrii.mercantec.tech/` — все 5 headers видны (2026-06-15)
+
+### Следующее ⬜
+
+- Security review (3 риска + mitigations) — aflevering
+- (Опционально) `dotnet list package --vulnerable`
+
+---
+
+*Обновлено: 2026-06-15 · Day 8–11 · nginx security headers · Kuma · Dokploy CD*
