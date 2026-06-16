@@ -1,8 +1,8 @@
 # Deploy or Die — Produktrapport
 
-**Navn:** Andrii Bondar · **Login:** anbo0005
-**Domæne:** https://andrii.mercantec.tech
-**Repo:** https://github.com/Mercantec-GHC/deploy-or-die-anbo0005
+**Navn:** Andrii Bondar · **Login:** anbo0005<br>
+**Domæne:** https://andrii.mercantec.tech<br>
+**Repo:** https://github.com/Mercantec-GHC/deploy-or-die-anbo0005<br>
 **Kursus:** Deploy or Die (14 dage) · Mercantec
 
 ---

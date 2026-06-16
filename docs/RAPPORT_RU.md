@@ -2,9 +2,9 @@
 
 > Рабочая русская версия. Сдаётся датский вариант — [RAPPORT.md](RAPPORT.md).
 
-**Имя:** Andrii Bondar · **Логин:** anbo0005
-**Домен:** https://andrii.mercantec.tech
-**Repo:** https://github.com/Mercantec-GHC/deploy-or-die-anbo0005
+**Имя:** Andrii Bondar · **Логин:** anbo0005<br>
+**Домен:** https://andrii.mercantec.tech<br>
+**Repo:** https://github.com/Mercantec-GHC/deploy-or-die-anbo0005<br>
 **Курс:** Deploy or Die (14 дней) · Mercantec
 
 ---
