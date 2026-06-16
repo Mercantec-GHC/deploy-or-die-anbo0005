@@ -74,7 +74,7 @@
       "<h2>" + escapeHtml(t.title) + "</h2>" +
       '<p class="meta">Dag ' + t.day + " · " + escapeHtml(t.dayTitle) + "</p>" +
       '<p class="lead">' + escapeHtml(t.summary) + "</p>" +
-      renderIllustration(t.diagram) +
+      renderIllustration(t.id || t.diagram) +
       '<div class="body">' + formatBody(t.body) + "</div>";
   }
 
