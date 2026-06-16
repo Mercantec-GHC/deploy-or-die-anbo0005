@@ -21,6 +21,9 @@
 | [notes/day9-kubernetes-dokploy.md](./notes/day9-kubernetes-dokploy.md) | Day 9 — Kubernetes/K3s, volumes, Dokploy, GitHub |
 | [notes/day10-monitoring-logging.md](./notes/day10-monitoring-logging.md) | Day 10 — Monitoring, logging, Uptime Kuma |
 | [notes/day11-owasp-security-headers.md](./notes/day11-owasp-security-headers.md) | Day 11 — OWASP Top 10, security headers |
+| [notes/day12-container-security-secrets.md](./notes/day12-container-security-secrets.md) | Day 12 — Container security, secrets, Trivy |
+| [notes/day13-ctf-hack-app.md](./notes/day13-ctf-hack-app.md) | Day 13 — CTF, OWASP exploit practice |
+| [notes/day14-incident-response-monitoring.md](./notes/day14-incident-response-monitoring.md) | Day 14 — Incident response, security monitoring |
 | [../README.md](../README.md) | Корневое описание проекта |
 | [SESSION_HANDOFF.md](./SESSION_HANDOFF.md) | Resume / handoff между сессиями |
 | [WORKFLOW.md](./WORKFLOW.md) | Правила: кто что делает · чеклист перед commit |
@@ -43,9 +46,12 @@
 | 9 | [notes/day9-kubernetes-dokploy.md](./notes/day9-kubernetes-dokploy.md) | ✅ теория · backup |
 | 10 | [notes/day10-monitoring-logging.md](./notes/day10-monitoring-logging.md) | ✅ Dokploy logs · Uptime Kuma |
 | 11 | [notes/day11-owasp-security-headers.md](./notes/day11-owasp-security-headers.md) | ✅ теория · nginx headers |
-| 12–15 | `notes/dayN-....md` | по мере прохождения |
+| 12 | [notes/day12-container-security-secrets.md](./notes/day12-container-security-secrets.md) | ⬜ Trivy · secrets |
+| 13 | [notes/day13-ctf-hack-app.md](./notes/day13-ctf-hack-app.md) | ⬜ CTF · OWASP practice |
+| 14 | [notes/day14-incident-response-monitoring.md](./notes/day14-incident-response-monitoring.md) | ⬜ IR plan · security logs |
+| 15 | `notes/day15-....md` | по мере прохождения |
 
-**Следующая практика:** Day 11 — OWASP + security headers в nginx — [notes/day11-owasp-security-headers.md](./notes/day11-owasp-security-headers.md)
+**Следующая практика:** Day 12 — Trivy scan + env vs secrets — [notes/day12-container-security-secrets.md](./notes/day12-container-security-secrets.md)
 
 ---
 
@@ -66,6 +72,9 @@
 - `day9-kubernetes-dokploy.md`
 - `day10-monitoring-logging.md`
 - `day11-owasp-security-headers.md`
+- `day12-container-security-secrets.md`
+- `day13-ctf-hack-app.md`
+- `day14-incident-response-monitoring.md`
 - ...
 - `day15-aflevering-fremlaeggelse.md`
 

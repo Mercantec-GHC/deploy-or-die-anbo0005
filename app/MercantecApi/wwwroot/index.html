@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deploy Course Helper</title>
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Deploy Course Helper</h1>
+      <p class="tagline">Korte forklaringer til Deploy or Die — Dag 1–14</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="toolbar">
+      <label class="search-label" for="search">Søg</label>
+      <input id="search" type="search" placeholder="Fx docker, nginx, OWASP…" autocomplete="off" />
+
+      <label class="filter-label" for="day-filter">Dag</label>
+      <select id="day-filter">
+        <option value="">Alle dage</option>
+      </select>
+    </section>
+
+    <div id="layout" class="layout hidden">
+      <aside class="sidebar" id="term-list" aria-label="Emner"></aside>
+      <article class="detail" id="term-detail">
+        <p class="placeholder">Vælg et emne til venstre.</p>
+      </article>
+    </div>
+
+    <p id="loading" class="loading">Henter emner…</p>
+    <p id="error" class="error hidden" role="alert"></p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <small>Mercantec Deploy · andrii.mercantec.tech</small>
+    </div>
+  </footer>
+
+  <script src="/js/diagrams.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+{
+  "terms": [
+    {
+      "id": "ssh",
+      "day": 1,
+      "dayTitle": "SSH og VM",
+      "title": "SSH",
+      "summary": "Sikker forbindelse fra din Mac til serveren uden adgangskode i klartekst.",
+      "body": "SSH (Secure Shell) lader dig logge ind på VM'en fra terminalen. Du bruger et nøglepar: privat nøgle på Mac, offentlig nøgle på serveren. Det er som en digital nøgle — kun du kan åbne døren. På kurset: ssh mercantec-andrii → andrii@VM.",
+      "diagram": "ssh"
+    },
+    {
+      "id": "vm-hardening",
+      "day": 1,
+      "dayTitle": "SSH og VM",
+      "title": "VM hardening",
+      "summary": "Gør serveren sværere at angribe fra start.",
+      "body": "Hardening betyder at lukke unødvendige døre: root kan ikke logge ind via SSH, adgangskode-login er slået fra, kun SSH-nøgle virker. Mindre angrebsflade = færre måder for en angriber at komme ind.",
+      "diagram": "vm"
+    },
+    {
+      "id": "ufw",
+      "day": 2,
+      "dayTitle": "DNS og firewall",
+      "title": "UFW firewall",
+      "summary": "Brandvæg på VM — kun tilladte porte må ind.",
+      "body": "UFW (Uncomplicated Firewall) blokerer indgående trafik som standard. Du åbner kun det nødvendige: 22 (SSH), 80 og 443 (web). Postgres og app på 127.0.0.1 er ikke åbne mod internettet — det er bevidst.",
+      "diagram": "firewall"
+    },
+    {
+      "id": "cloudflare-tunnel",
+      "day": 2,
+      "dayTitle": "DNS og firewall",
+      "title": "Cloudflare Tunnel",
+      "summary": "Din VM behøver ikke åben offentlig IP — trafik kommer gennem en sikker tunnel.",
+      "body": "cloudflared på VM opretter en forbindelse ud til Cloudflare. Brugere besøger https://andrii.mercantec.tech → Cloudflare → tunnel → nginx på localhost:8080. HTTPS håndteres udenfor VM. Det er derfor dig viser Cloudflare-IP, ikke skolens VM-IP.",
+      "diagram": "tunnel"
+    },
+    {
+      "id": "docker-container",
+      "day": 3,
+      "dayTitle": "Docker og database",
+      "title": "Docker-container",
+      "summary": "En isoleret 'æske' med din app og det den skal bruge for at køre.",
+      "body": "En container kører et image. Alt indeni er adskilt fra resten af VM'en. Hvis du sletter containeren, forsvinder data inde i den — medmindre du bruger et volume. Tænk: flybar kasse vs. fast skab på væggen (volume).",
+      "diagram": "container"
+    },
+    {
+      "id": "docker-image",
+      "day": 3,
+      "dayTitle": "Docker og database",
+      "title": "Docker-image",
+      "summary": "Opskriften / skabelonen som containers bygges fra.",
+      "body": "Et image er skrivebeskyttet lag: OS-basis + din app. Dockerfile beskriver hvordan image bygges. docker run starter en container fra image. Samme image → mange ens containers. Opdater app = byg nyt image, start ny container.",
+      "diagram": "image"
+    },
+    {
+      "id": "postgres-volume",
+      "day": 3,
+      "dayTitle": "Docker og database",
+      "title": "Named volume (pgdata)",
+      "summary": "Database-data overlever når container genstartes eller slettes.",
+      "body": "Volume pgdata ligger på VM'ens disk, ikke inde i containeren. Når Postgres-containeren genstartes, monteres samme volume — data er stadig der. Uden volume: hver ny container = tom database.",
+      "diagram": "volume"
+    },
+    {
+      "id": "nginx",
+      "day": 4,
+      "dayTitle": "Nginx og HTTPS",
+      "title": "Nginx",
+      "summary": "Webserver på VM der modtager trafik fra tunnel og sender den videre.",
+      "body": "Nginx lytter på 127.0.0.1:8080. Cloudflare tunnel peger hertil. Nginx kan serve statiske filer eller proxy til app (fx /api/ → port 5000). Det er 'reverse proxy' — brugeren ser ét domæne, nginx fordeler internt.",
+      "diagram": "nginx"
+    },
+    {
+      "id": "https-edge",
+      "day": 4,
+      "dayTitle": "Nginx og HTTPS",
+      "title": "HTTPS ved Cloudflare",
+      "summary": "Krypteret forbindelse mellem bruger og Cloudflare — uden Certbot på VM.",
+      "body": "Med tunnel får brugeren HTTPS fra Cloudflare. Mellem Cloudflare og din VM kan trafikken være HTTP på localhost — det er OK i det lukkede setup. Certbot på VM er ofte ikke nødvendig her.",
+      "diagram": "https"
+    },
+    {
+      "id": "reverse-proxy",
+      "day": 5,
+      "dayTitle": "Reverse proxy",
+      "title": "Reverse proxy",
+      "summary": "Én indgang (domæne) — nginx sender forskellige stier til forskellige services.",
+      "body": "location / → app eller statisk side. location /api/ → ASP.NET på port 5000. Brugeren ser kun andrii.mercantec.tech. Nginx er portvagt der videresender requests. Det gør det nemt at tilføje flere backends senere.",
+      "diagram": "nginx"
+    },
+    {
+      "id": "dockerfile",
+      "day": 6,
+      "dayTitle": "Dockerfile",
+      "title": "Dockerfile",
+      "summary": "Tekstfil med trin til at bygge dit app-image.",
+      "body": "FROM vælger base image. COPY kopierer kode. RUN kører kommandoer (fx dotnet publish). CMD starter appen. Multi-stage: først SDK til build, så mindre runtime-image uden compiler. Resultat: reproducerbar deploy.",
+      "diagram": "dockerfile"
+    },
+    {
+      "id": "docker-compose",
+      "day": 7,
+      "dayTitle": "Docker Compose",
+      "title": "Docker Compose",
+      "summary": "Én fil der starter app + database sammen med netværk og volumes.",
+      "body": "docker-compose.yml beskriver services: app og db. Compose opretter et netværk — app kan bruge hostname db til Postgres. env_file læser .env. depends_on venter på at db er healthy. docker compose up -d starter hele stacken.",
+      "diagram": "compose"
+    },
+    {
+      "id": "github-actions",
+      "day": 8,
+      "dayTitle": "CI/CD og Dokploy",
+      "title": "GitHub Actions (CI)",
+      "summary": "Automatisk build-test hver gang du pusher til GitHub.",
+      "body": "Workflow i .github/workflows/ci.yml kører ved push/PR. Typisk: docker build af Dockerfile. CI = Continuous Integration — fejl fanges før deploy. Det beviser at image kan bygges, ikke at alt virker i produktion.",
+      "diagram": "cicd"
+    },
+    {
+      "id": "dokploy",
+      "day": 8,
+      "dayTitle": "CI/CD og Dokploy",
+      "title": "Dokploy (CD)",
+      "summary": "Panel på VM der deployer fra Git når der pushes — uden manuel ssh.",
+      "body": "Dokploy læser repo, bygger/kører compose, holder containers kørende. Webhook fra GitHub ved push → redeploy på ~1 min. CD = Continuous Deployment. Du arbejder på Mac, Dokploy opdaterer VM.",
+      "diagram": "dokploy"
+    },
+    {
+      "id": "webhook",
+      "day": 8,
+      "dayTitle": "CI/CD og Dokploy",
+      "title": "Webhook",
+      "summary": "GitHub råber til Dokploy: der var et push!",
+      "body": "Webhook URL i GitHub Settings. Ved push sender GitHub JSON til Dokploy. Vigtigt: Content-Type application/json. Dokploy starter deploy. Uden webhook: manuel redeploy i UI.",
+      "diagram": "cicd"
+    },
+    {
+      "id": "kubernetes-pod",
+      "day": 9,
+      "dayTitle": "Kubernetes og backup",
+      "title": "Pod (Kubernetes)",
+      "summary": "Mindste enhed i K8s — som en container, men styret af cluster.",
+      "body": "En pod kører typisk én container (app eller db). Kubernetes genstarter pods, balancerer belastning. I bruger Compose + Dokploy på VM — ikke K3s — men idéen er den samme: beskriv hvad der skal køre, systemet holder det oppe.",
+      "diagram": "k8s"
+    },
+    {
+      "id": "pg-dump",
+      "day": 9,
+      "dayTitle": "Kubernetes og backup",
+      "title": "pg_dump backup",
+      "summary": "Kopi af database til fil — uden for selve volume.",
+      "body": "pg_dump eksporterer SQL til ~/backup_YYYYMMDD.sql på VM. Hvis volume ødelægges, kan du genskabe fra fil. Volume = live data; backup = ekstra sikkerhedskopi. Kør jævnligt i produktion.",
+      "diagram": "volume"
+    },
+    {
+      "id": "monitoring",
+      "day": 10,
+      "dayTitle": "Monitoring og logging",
+      "title": "Monitoring",
+      "summary": "Er systemet oppe? Bruger CPU/RAM normalt?",
+      "body": "Dokploy viser container status (Running/Exited) og ressourcer. Uptime Kuma pinger din URL udefra hvert 60. sek. Monitoring svarer på: lever det? Uden det opdager du nedetid først fra brugere.",
+      "diagram": "monitoring"
+    },
+    {
+      "id": "logging",
+      "day": 10,
+      "dayTitle": "Monitoring og logging",
+      "title": "Logging",
+      "summary": "Hvad skrev applikationen? Fejl, start, advarsler.",
+      "body": "Containers skriver til stdout/stderr. Dokploy Logs viser det. Når noget går galt, læser du logs for at finde årsagen. Log aldrig passwords eller tokens i produktion.",
+      "diagram": "monitoring"
+    },
+    {
+      "id": "uptime-kuma",
+      "day": 10,
+      "dayTitle": "Monitoring og logging",
+      "title": "Uptime Kuma",
+      "summary": "Ekstern overvågning — tjekker om URL svarer 200 udefra.",
+      "body": "Kuma kører separat på VM (ikke i app compose). Den tester hele vejen: Cloudflare → tunnel → nginx → app. Dokploy ser inde i container; Kuma ser hvad brugeren ser.",
+      "diagram": "monitoring"
+    },
+    {
+      "id": "owasp-top10",
+      "day": 11,
+      "dayTitle": "OWASP og headers",
+      "title": "OWASP Top 10",
+      "summary": "Liste over de mest kritiske web-sårbarheder.",
+      "body": "OWASP samler typiske fejl: broken access control, injection, misconfiguration osv. Du behøver ikke huske alle detaljer — men kunne navngive flere og foreslå fix. Det er risikovurdering for webapps.",
+      "diagram": "owasp"
+    },
+    {
+      "id": "security-headers",
+      "day": 11,
+      "dayTitle": "OWASP og headers",
+      "title": "Security headers",
+      "summary": "HTTP-headers der fortæller browseren hvordan siden må bruges.",
+      "body": "CSP begrænser scripts. HSTS tvinger HTTPS. X-Frame-Options beskytter mod clickjacking. Sat i nginx med add_header. De reducerer skade ved XSS og misconfiguration (A05).",
+      "diagram": "headers"
+    },
+    {
+      "id": "env-vs-secrets",
+      "day": 12,
+      "dayTitle": "Container security",
+      "title": "Environment variables vs secrets",
+      "summary": "Env til konfiguration; secrets til passwords og nøgler.",
+      "body": "ASPNETCORE_ENVIRONMENT=Production er OK i env. DB_PASSWORD hører i .env (ikke i git) eller Dokploy secrets. docker inspect kan læse env — derfor er følsomme data ikke 'sikre' bare fordi de er env vars.",
+      "diagram": "secrets"
+    },
+    {
+      "id": "trivy",
+      "day": 12,
+      "dayTitle": "Container security",
+      "title": "Trivy scan",
+      "summary": "Scanner Docker-images for kendte sårbarheder (CVE).",
+      "body": "trivy image postgres:16-alpine viser CRITICAL/HIGH/MEDIUM. Det dækker OWASP A06 (outdated components). Fix: opdater base image og NuGet, byg igen, scan igen. Gør det før produktion.",
+      "diagram": "trivy"
+    },
+    {
+      "id": "non-root-container",
+      "day": 12,
+      "dayTitle": "Container security",
+      "title": "Kør ikke som root",
+      "summary": "App i container bør køre som almindelig bruger — ikke root.",
+      "body": "Standard images kører ofte som root. Hvis angriber kommer ind, har de flere rettigheder. Dockerfile kan tilføje USER appuser. Mindre skade ved kompromis.",
+      "diagram": "container"
+    },
+    {
+      "id": "ctf",
+      "day": 13,
+      "dayTitle": "CTF",
+      "title": "CTF (Capture The Flag)",
+      "summary": "Praktisk øvelse: find og udnyt sårbarheder i en test-app.",
+      "body": "Du angriber bevidst en sårbar app for at finde flags (skjulte strenge). Metode: recon → test → exploit → dokumenter. Kun på teacher's CTF — aldrig på rigtige systemer uden tilladelse. Lærer dig at forsvare bedre.",
+      "diagram": "ctf"
+    },
+    {
+      "id": "sql-injection",
+      "day": 13,
+      "dayTitle": "CTF",
+      "title": "SQL injection",
+      "summary": "Brugerinput bliver til SQL-kode — database kan lække eller ødelægges.",
+      "body": "Farligt: 'SELECT * FROM users WHERE id = ' + input. Sikker: parametriserede queries. I CTF tester du med ' OR '1'='1. I din egen app: altid ORM/parameters.",
+      "diagram": "owasp"
+    },
+    {
+      "id": "incident-response",
+      "day": 14,
+      "dayTitle": "Incident response",
+      "title": "Incident response plan",
+      "summary": "Forud aftalt plan når noget går galt — ikke panik.",
+      "body": "Faser: Detect (opdag) → Contain (inddæm) → Eradicate (fjern årsag) → Recover (genopret) → Post-incident (lær af det). Kort liste: hvem gør hvad, hvor er logs, hvordan skifter vi passwords.",
+      "diagram": "incident"
+    },
+    {
+      "id": "security-logs",
+      "day": 14,
+      "dayTitle": "Incident response",
+      "title": "Security log analysis",
+      "summary": "Læs logs med sikkerhedsbriller — mønstre der kan være angreb.",
+      "body": "Mange 404 fra én IP = scanning. Mange 401/403 = brute force. SQL-fejl i logs = mulig injection. Dokploy Logs + nginx access.log. Kombiner med Uptime Kuma alerts.",
+      "diagram": "monitoring"
+    }
+  ]
+}

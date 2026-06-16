@@ -1,6 +1,19 @@
 @MercantecApi_HostAddress = http://localhost:5048
 
-GET {{MercantecApi_HostAddress}}/weatherforecast/
+GET {{MercantecApi_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+GET {{MercantecApi_HostAddress}}/api/terms
+Accept: application/json
+
+###
+
+GET {{MercantecApi_HostAddress}}/api/terms/docker-container
+Accept: application/json
+
+###
+
+GET {{MercantecApi_HostAddress}}/
+Accept: text/html
