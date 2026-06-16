@@ -25,38 +25,48 @@ function scene(label, body) {
 }
 
 function bubble(x, y, w, text) {
-  return `<rect x="${x}" y="${y}" width="${w}" height="34" rx="10" fill="#fff" stroke="#cbd5e1"/>
-  <text x="${x + w / 2}" y="${y + 21}" text-anchor="middle" font-size="11" fill="#334155">${text}</text>`;
+  return `<rect x="${x}" y="${y}" width="${w}" height="38" rx="11" fill="#fff" stroke="#cbd5e1"/>
+  <text x="${x + w / 2}" y="${y + 24}" text-anchor="middle" font-size="13" fill="#334155">${text}</text>`;
 }
 
 function arrow(x1, y1, x2, y2, label) {
   const mid = (x1 + x2) / 2;
   return `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arr)"/>
-  ${label ? `<text x="${mid}" y="${y1 - 8}" text-anchor="middle" font-size="10" fill="#64748b">${label}</text>` : ""}`;
+  ${label ? `<text x="${mid}" y="${y1 - 9}" text-anchor="middle" font-size="11" fill="#64748b">${label}</text>` : ""}`;
 }
 
 function emojiBox(x, y, w, h, emoji, title, sub) {
   return `<g filter="url(#soft)">
     <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
-    <text x="${x + w / 2}" y="${y + h * 0.45}" text-anchor="middle" font-size="${h * 0.35}">${emoji}</text>
-    <text x="${x + w / 2}" y="${y + h * 0.72}" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">${title}</text>
-    ${sub ? `<text x="${x + w / 2}" y="${y + h * 0.88}" text-anchor="middle" font-size="9" fill="#64748b">${sub}</text>` : ""}
+    <text x="${x + w / 2}" y="${y + h * 0.44}" text-anchor="middle" font-size="${Math.min(h * 0.34, 38)}">${emoji}</text>
+    <text x="${x + w / 2}" y="${y + h * 0.73}" text-anchor="middle" font-size="13" fill="#334155" font-weight="700">${title}</text>
+    ${sub ? `<text x="${x + w / 2}" y="${y + h * 0.89}" text-anchor="middle" font-size="10" fill="#64748b">${sub}</text>` : ""}
   </g>`;
 }
 
+// Containers ride on the whale's back: each box is sized for its label,
+// the row is centered over the whale, and the icon+label sit inside the box.
 function whale(x, y, w, boxes) {
-  const cx = x + w * 0.45, cy = y + w * 0.35;
-  const cont = (boxes || []).map((c, i) => {
-    const bx = x + w * 0.12 + i * w * 0.22;
-    return `<rect x="${bx}" y="${y - 8}" width="${w * 0.18}" height="${w * 0.15}" rx="8" fill="#fff" stroke="#2563eb" stroke-width="2"/>
-    <text x="${bx + w * 0.09}" y="${y + w * 0.04}" text-anchor="middle" font-size="10" fill="#64748b">${c.label}</text>
-    <text x="${bx + w * 0.09}" y="${y + w * 0.1}" text-anchor="middle" font-size="14">${c.icon}</text>`;
+  const list = boxes || [];
+  const cx = x + w * 0.45, cy = y + w * 0.4;
+  const ry = w * 0.17;
+  const bw = 72, bh = 48, gap = 14;
+  const totalW = list.length * bw + Math.max(0, list.length - 1) * gap;
+  const startX = cx - totalW / 2;
+  const boxY = cy - ry - bh - 6;
+  const cont = list.map((c, i) => {
+    const bx = startX + i * (bw + gap);
+    return `<g>
+      <rect x="${bx}" y="${boxY}" width="${bw}" height="${bh}" rx="8" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+      <text x="${bx + bw / 2}" y="${boxY + 26}" text-anchor="middle" font-size="20">${c.icon}</text>
+      <text x="${bx + bw / 2}" y="${boxY + 41}" text-anchor="middle" font-size="10" fill="#475569" font-weight="600">${c.label}</text>
+    </g>`;
   }).join("");
   return `<g filter="url(#soft)">${cont}
-    <ellipse cx="${cx}" cy="${cy}" rx="${w * 0.36}" ry="${w * 0.17}" fill="url(#whale)"/>
+    <ellipse cx="${cx}" cy="${cy}" rx="${w * 0.36}" ry="${ry}" fill="url(#whale)"/>
     <circle cx="${cx - w * 0.26}" cy="${cy - w * 0.03}" r="${w * 0.035}" fill="#fff"/>
     <circle cx="${cx - w * 0.255}" cy="${cy - w * 0.03}" r="${w * 0.018}" fill="#0f172a"/>
-    <text x="${cx}" y="${cy + w * 0.26}" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">Docker</text>
+    <text x="${cx}" y="${cy + ry + 20}" text-anchor="middle" font-size="13" fill="#1e40af" font-weight="700">Docker</text>
   </g>`;
 }
 
@@ -65,16 +75,17 @@ function daemon(x, y) {
     <rect x="${x}" y="${y}" width="80" height="95" rx="12" fill="#6366f1" stroke="#4338ca" stroke-width="2"/>
     <rect x="${x + 14}" y="${y + 18}" width="52" height="32" rx="6" fill="#e0e7ff"/>
     <circle cx="${x + 28}" cy="${y + 34}" r="5" fill="#22c55e"/><circle cx="${x + 52}" cy="${y + 34}" r="5" fill="#22c55e"/>
-    <text x="${x + 40}" y="${y + 112}" text-anchor="middle" font-size="10" fill="#4338ca" font-weight="700">dockerd</text>
+    <text x="${x + 40}" y="${y + 114}" text-anchor="middle" font-size="11" fill="#4338ca" font-weight="700">dockerd</text>
   </g>`;
 }
 
+// Terminal box is wide enough for a short command at a legible size.
 function cli(x, y, cmd) {
   return `<g filter="url(#soft)">
-    <circle cx="${x + 24}" cy="${y + 14}" r="16" fill="#fcd34d" stroke="#f59e0b" stroke-width="2"/>
-    <rect x="${x + 46}" y="${y + 38}" width="68" height="42" rx="8" fill="#1e293b"/>
-    <text x="${x + 54}" y="${y + 56}" font-size="7" fill="#4ade80" font-family="monospace">$ ${cmd}</text>
-    <text x="${x + 24}" y="${y + 98}" text-anchor="middle" font-size="10" fill="#1e40af" font-weight="700">CLI</text>
+    <circle cx="${x + 20}" cy="${y + 14}" r="15" fill="#fcd34d" stroke="#f59e0b" stroke-width="2"/>
+    <rect x="${x}" y="${y + 34}" width="116" height="40" rx="8" fill="#1e293b"/>
+    <text x="${x + 9}" y="${y + 59}" font-size="12" fill="#4ade80" font-family="monospace">$ ${cmd}</text>
+    <text x="${x + 20}" y="${y + 92}" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="700">CLI</text>
   </g>`;
 }
 
@@ -83,12 +94,12 @@ function composeIsland(x, y, w, h) {
   return `<g filter="url(#soft)">
     <ellipse cx="${x + w / 2}" cy="${y + h * 0.72}" rx="${w * 0.48}" ry="${h * 0.22}" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
     <ellipse cx="${x + w / 2}" cy="${y + h * 0.68}" rx="${w * 0.42}" ry="${h * 0.16}" fill="#bbf7d0"/>
-    <text x="${x + w / 2}" y="${y + 18}" text-anchor="middle" font-size="12" fill="#166534" font-weight="700">Compose-miljø</text>
-    <text x="${x + w / 2}" y="${y + 34}" text-anchor="middle" font-size="9" fill="#64748b">containers bor sammen her</text>
-    ${emojiBox(x + w * 0.12, y + h * 0.38, w * 0.32, h * 0.38, "🚀", "app", "service")}
-    ${emojiBox(x + w * 0.56, y + h * 0.38, w * 0.32, h * 0.38, "🐘", "db", "service")}
-    <path d="M${x + w * 0.44} ${y + h * 0.57} L${x + w * 0.56} ${y + h * 0.57}" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 3"/>
-    <text x="${x + w / 2}" y="${y + h * 0.62}" text-anchor="middle" font-size="8" fill="#2563eb">compose net</text>
+    <text x="${x + w / 2}" y="${y + 20}" text-anchor="middle" font-size="13" fill="#166534" font-weight="700">Compose-miljø</text>
+    <text x="${x + w / 2}" y="${y + 36}" text-anchor="middle" font-size="10" fill="#64748b">containers bor sammen her</text>
+    ${emojiBox(x + w * 0.1, y + h * 0.4, w * 0.34, h * 0.36, "🚀", "app", "service")}
+    ${emojiBox(x + w * 0.56, y + h * 0.4, w * 0.34, h * 0.36, "🐘", "db", "service")}
+    <path d="M${x + w * 0.44} ${y + h * 0.58} L${x + w * 0.56} ${y + h * 0.58}" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="${x + w / 2}" y="${y + h * 0.64}" text-anchor="middle" font-size="9" fill="#2563eb">compose net</text>
   </g>`;
 }
 
@@ -198,28 +209,28 @@ const ILLUSTRATIONS = {
   `),
 
   "docker-ecosystem": scene("Docker ecosystem", `
-    ${cli(30, 115, "docker run")}
-    ${arrow(125, 155, 175, 155, "1. besked")}
-    ${daemon(175, 105)}
-    ${arrow(260, 155, 320, 165, "2. bygger")}
-    ${whale(320, 120, 180, [{ label: "container", icon: "📦" }])}
-    ${bubble(80, 40, 560, "Du → CLI → daemon → container på Docker-hvalen")}
+    ${cli(20, 110, "docker run")}
+    ${arrow(140, 150, 205, 150, "1. besked")}
+    ${daemon(210, 105)}
+    ${arrow(295, 150, 360, 160, "2. bygger")}
+    ${whale(375, 135, 175, [{ label: "container", icon: "📦" }])}
+    ${bubble(70, 35, 580, "Du → CLI → daemon → container på Docker-hvalen")}
   `),
 
   "docker-cli": scene("CLI", `
-    ${cli(120, 90, "compose up")}
-    ${arrow(220, 155, 290, 155, "sender kommando")}
-    ${daemon(290, 100)}
-    ${bubble(400, 50, 280, "CLI = budbringeren du skriver til")}
-    <text x="360" y="240" text-anchor="middle" font-size="10" fill="#64748b">docker run · docker build · docker compose</text>
+    ${cli(50, 95, "compose up")}
+    ${arrow(175, 140, 290, 140, "sender kommando")}
+    ${daemon(295, 95)}
+    ${bubble(395, 45, 295, "CLI = budbringeren du skriver til")}
+    <text x="360" y="255" text-anchor="middle" font-size="11" fill="#64748b">docker run · docker build · docker compose</text>
   `),
 
   "docker-daemon": scene("Daemon", `
-    ${daemon(200, 75)}
-    ${bubble(320, 45, 360, "dockerd = motoren på VM der gør alt arbejdet")}
-    <text x="240" y="210" text-anchor="middle" font-size="10" fill="#64748b">Pull images · build · start/stop containers</text>
-    <text x="240" y="228" text-anchor="middle" font-size="10" fill="#64748b">Kører som service: systemctl status docker</text>
-    ${whale(400, 120, 160, [{ label: "job", icon: "⚙️" }])}
+    ${daemon(120, 95)}
+    ${arrow(205, 140, 280, 140, "styrer")}
+    ${whale(295, 125, 175, [{ label: "job", icon: "⚙️" }])}
+    ${bubble(60, 40, 600, "dockerd = motoren på VM der gør alt arbejdet")}
+    <text x="360" y="260" text-anchor="middle" font-size="11" fill="#64748b">Pull · build · start/stop containers · kører som systemd-service</text>
   `),
 
   "docker-container": scene("Container", `
@@ -300,26 +311,27 @@ const ILLUSTRATIONS = {
   `),
 
   dockerfile: scene("Dockerfile", `
-    ${cli(40, 110, "build .")}
-    ${arrow(130, 155, 185, 155)}
-    ${daemon(185, 100)}
+    ${cli(20, 105, "build .")}
+    ${arrow(140, 150, 185, 150)}
+    ${daemon(190, 100)}
+    ${arrow(275, 150, 320, 150)}
     <g filter="url(#soft)">
-      <rect x="290" y="75" width="120" height="140" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-      <text x="350" y="110" text-anchor="middle" font-size="11" fill="#92400e" font-weight="700">Dockerfile</text>
-      <text x="350" y="160" text-anchor="middle" font-size="40">👨‍🍳</text>
-      <text x="350" y="195" text-anchor="middle" font-size="9" fill="#64748b">kok laver image</text>
+      <rect x="325" y="75" width="115" height="140" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+      <text x="382" y="110" text-anchor="middle" font-size="12" fill="#92400e" font-weight="700">Dockerfile</text>
+      <text x="382" y="160" text-anchor="middle" font-size="40">👨‍🍳</text>
+      <text x="382" y="198" text-anchor="middle" font-size="10" fill="#64748b">kok laver image</text>
     </g>
-    ${arrow(415, 155, 470, 165)}
-    ${whale(470, 120, 150, [{ label: "image", icon: "📦" }])}
+    ${arrow(445, 150, 495, 160)}
+    ${whale(500, 130, 160, [{ label: "image", icon: "📦" }])}
   `),
 
   "docker-compose": scene("Compose environment", `
-    ${cli(30, 100, "compose up")}
-    ${arrow(120, 145, 175, 145)}
-    ${daemon(175, 95)}
-    ${arrow(260, 150, 310, 160)}
-    ${composeIsland(305, 55, 380, 200)}
-    ${bubble(30, 230, 400, "Compose = fælles miljø hvor app og db lever sammen")}
+    ${cli(20, 90, "compose up")}
+    ${arrow(140, 130, 185, 130)}
+    ${daemon(190, 85)}
+    ${arrow(275, 135, 310, 145)}
+    ${composeIsland(315, 50, 380, 195)}
+    ${bubble(20, 235, 410, "Compose = fælles miljø hvor app og db lever sammen")}
   `),
 
   "github-actions": scene("CI", `

@@ -6,7 +6,7 @@
       "dayTitle": "SSH og VM",
       "title": "SSH",
       "summary": "Sikker forbindelse fra din Mac til serveren uden adgangskode i klartekst.",
-      "body": "SSH (Secure Shell) lader dig logge ind på VM'en fra terminalen.\n\nSådan virker det:\n1. Du skriver ssh mercantec-andrii på Mac\n2. Serveren siger: bevis at du har nøglen\n3. Mac signerer med din private nøgle (nøglen sendes aldrig over nettet)\n4. Serveren tjekker med din offentlige nøgle i authorized_keys\n5. OK → du er inde\n\nDet er som en digital nøgle — kun du kan åbne døren. Port 22 er kun til admin, ikke til hjemmesiden.",
+      "body": "SSH (Secure Shell) er den krypterede forbindelse, du bruger til at styre din server fra Mac'en. Alt du skriver og modtager er krypteret, så ingen kan se det undervejs – i modsætning til de gamle protokoller Telnet og FTP, der sendte passwords i klartekst.\n\nForbindelsen foregår i fem trin:\n• Mac kontakter serveren på port 22\n• De aftaler en hemmelig nøgle via Diffie-Hellman (ingen hemmelighed sendes over nettet)\n• En krypteret kanal oprettes med AES-256\n• Serveren udfordrer Mac'en: \"Bevis at du har nøglen\"\n• Mac'en underskriver med din private nøgle, serveren tjekker med den offentlige – og slipper dig ind\n\nPort 22 er admin-døren til serveren. Derfor er det vigtigt at låse den ordentligt: kun SSH-nøgler, ingen root-login. Kommandoen ser sådan ud: ssh andrii@10.133.51.122",
       "diagram": "ssh"
     },
     {
@@ -15,7 +15,7 @@
       "dayTitle": "SSH og VM",
       "title": "VM og Ubuntu",
       "summary": "En VM er en mini-computer i datacentret — du styrer den over nettet.",
-      "body": "VM / VPS = en lille computer hos skolen, som du logger ind på fra Mac.\n\nUbuntu er operativsystemet på den computer — som Linux, bare fjernstyret.\n\nAnalogi: VM er hele huset. Docker-containere (senere) er rum inde i huset.",
+      "body": "En VM (Virtual Machine) er en mini-computer, der kører inde i en rigtig fysisk server i et datacenter – i vores tilfælde Datahouse-DC hos Mercantec. Du kan ikke røre den fysisk, men du kan logge ind via SSH og bruge den præcis som en rigtig computer.\n\nTænk på det som et hus med mange rum. Den fysiske server er huset. Din VM er ét rum i det hus – den har sine egne ressourcer (CPU, RAM, disk) men deler husets fundament med andre VMs.\n\nUbuntu er operativsystemet i dit rum – det er det, der starter op, håndterer filer og kører programmer. Vi bruger Ubuntu 24.04 Server (ikke Desktop), fordi servere ikke har brug for en grafisk skærm. Alle kommandoer køres i terminalen via SSH.",
       "diagram": "vm"
     },
     {
@@ -24,7 +24,7 @@
       "dayTitle": "SSH og VM",
       "title": "SSH-nøglepar",
       "summary": "Privat nøgle på Mac + offentlig nøgle på server = login uden password.",
-      "body": "Du har to nøgler:\n• Privat nøgle — bliver på din Mac (aldrig del den)\n• Offentlig nøgle — ligger i authorized_keys på VM\n\nNår password-login er slået fra, virker kun nøglen. Uden privat nøgle på Mac kan ingen logge ind — heller ikke med det rigtige password.",
+      "body": "Et SSH-nøglepar fungerer som en digital lås og nøgle. Du har to filer:\n• Den private nøgle (~/.ssh/id_ed25519_mercantec_school) – ligger kun på din Mac og forlader aldrig din maskine\n• Den offentlige nøgle (.pub) – kopieres til serveren i filen ~/.ssh/authorized_keys\n\nNår du logger ind, sender serveren en tilfældig udfordring. Din Mac underskriver den med den private nøgle. Serveren tjekker underskriften med den offentlige nøgle. Passer de? Så slippes du ind – uden at sende et password.\n\nNøgleparret genereres med: ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_mercantec_school\nKopieres til serveren med: ssh-copy-id -i ~/.ssh/id_ed25519_mercantec_school.pub andrii@SERVER-IP\n\nEfter opsætningen sætter vi PasswordAuthentication no i /etc/ssh/sshd_config, så password-login slukkes helt. Den private nøgle må aldrig deles – ikke i chat, ikke i git, ikke til nogen.",
       "diagram": "ssh"
     },
     {
@@ -33,7 +33,7 @@
       "dayTitle": "SSH og VM",
       "title": "VM hardening",
       "summary": "Gør serveren sværere at angribe fra start.",
-      "body": "Hardening betyder at lukke unødvendige døre: root kan ikke logge ind via SSH, adgangskode-login er slået fra, kun SSH-nøgle virker. Mindre angrebsflade = færre måder for en angriber at komme ind.",
+      "body": "Hardening betyder at lukke alle unødvendige døre på serveren, så det er sværere for angribere at komme ind. En frisk Ubuntu-server er som et hus med åbne vinduer – den er ikke klar til at stå på internettet uden videre.\n\nDe vigtigste trin vi gennemgår:\n• Opret en normal bruger med sudo-rettigheder (adduser + usermod -aG sudo)\n• Sæt PermitRootLogin no i /etc/ssh/sshd_config – root er yndlingsmålet for angribere\n• Sæt PasswordAuthentication no – kun SSH-nøgler tillades\n• Genstart SSH-tjenesten: sudo systemctl restart ssh\n• Hold systemet opdateret: sudo apt update && sudo apt upgrade\n\nVigtigt: Test altid at du stadig kan logge ind i et nyt terminalvindue, inden du lukker den gamle session. Ellers risikerer du at låse dig selv ude. En hardened server har en lille angrebsflade – færre åbne porte og ingen svage passwords.",
       "diagram": "vm"
     },
     {
@@ -42,7 +42,7 @@
       "dayTitle": "DNS og firewall",
       "title": "DNS",
       "summary": "Internettets telefonbog — oversætter domænenavn til hvor trafikken skal hen.",
-      "body": "Når du skriver andrii.mercantec.tech, spørger browseren DNS: hvor skal jeg hen?\n\nHos os peger DNS til Cloudflare — ikke direkte til VM'ens IP. Derfor viser dig Cloudflare's IP, ikke skolens interne IP. Det er normalt med tunnel.",
+      "body": "DNS (Domain Name System) er internettets telefonbog. Når du skriver andrii.mercantec.tech i browseren, spørger din computer DNS: \"Hvad er IP-adressen for det navn?\" DNS svarer, og browseren ved nu, hvad den skal forbinde til.\n\nHvordan virker det trin for trin:\n• Browser spørger din lokale DNS-cache\n• Ikke der? Spørger din internetudbyders resolver\n• Resolver spørger rod-servere, TLD-servere (.tech), og til sidst Cloudflare\n• Cloudflare svarer med IP-adressen (eller tunnel-info)\n\nDe vigtigste DNS-typer:\n• A-record – peger et navn på en IPv4-adresse\n• CNAME – peger et navn på et andet navn\n• TTL – hvor længe svaret må gemmes i cache (300 sekunder = 5 min)\n\nPå kurset bruger vi Cloudflare Tunnel, så dig viser Cloudflares IP – ikke VM'ens IP. Det er normalt og korrekt.",
       "diagram": "tunnel"
     },
     {
@@ -51,7 +51,7 @@
       "dayTitle": "DNS og firewall",
       "title": "cloudflared",
       "summary": "Lille program på VM der holder tunnelen åben til Cloudflare.",
-      "body": "cloudflared kører som container med --network host.\n\nDen laver en udgående forbindelse til Cloudflare (VM behøver ikke åben port 8080 i UFW). Når en bruger besøger dit domæne, sender Cloudflare request gennem tunnelen → cloudflared → nginx på localhost:8080.\n\n502 = tunnel OK, men nginx/app svarer ikke. 1033 = tunnel/cloudflared nede.",
+      "body": "cloudflared er et lille program (kører som Docker-container på VM'en), der holder en udgående tunnel åben til Cloudflare. Udgående – altså VM'en ringer til Cloudflare, ikke omvendt. Derfor behøver du ikke åbne port 8080 i firewallen.\n\nSådan ser flowet ud:\nBruger → https://andrii.mercantec.tech → Cloudflare → tunnel → cloudflared → localhost:8080 → nginx\n\ncloudflared startes med: docker run -d --name cloudflared --network host cloudflare/cloudflared:latest tunnel run --token TOKEN\n\nFlagget --network host er vigtigt: uden det kan cloudflared ikke finde localhost:8080 på VM'en – det ville kun se containerens eget netværk.\n\nTo fejlkoder at kende:\n• 502 – tunnelen virker, men der er intet på port 8080 (nginx er nede)\n• 1033 – cloudflared selv kører ikke, eller tunnelen er ikke registreret\n\nFormlen er: tunnel OK + noget på 8080 = sitet virker.",
       "diagram": "tunnel"
     },
     {
@@ -60,7 +60,7 @@
       "dayTitle": "DNS og firewall",
       "title": "UFW firewall",
       "summary": "Brandvæg på VM — kun tilladte porte må ind.",
-      "body": "UFW (Uncomplicated Firewall) blokerer indgående trafik som standard. Du åbner kun det nødvendige: 22 (SSH), 80 og 443 (web). Postgres og app på 127.0.0.1 er ikke åbne mod internettet — det er bevidst.",
+      "body": "UFW (Uncomplicated Firewall) er en brandvæg, der sidder foran serveren og afgør, hvilke forbindelser der må komme ind. Som standard blokeres alt indgående trafik – det er det sikre udgangspunkt.\n\nOpsætningen følger denne rækkefølge:\n• sudo ufw default deny incoming – bloker alt ind\n• sudo ufw default allow outgoing – tillad alt ud (apt, DNS)\n• sudo ufw allow 22/tcp – SSH FØRST, ellers låser du dig selv ude\n• sudo ufw allow 80/tcp – HTTP\n• sudo ufw allow 443/tcp – HTTPS\n• sudo ufw enable – tænd firewallen\n\nDatabase-containeren (PostgreSQL port 5432) og app-port 8080 åbnes IKKE i UFW – de lytter kun på 127.0.0.1 (localhost), og er dermed ikke tilgængelige udefra. Cloudflare-tunnelen håndterer web-trafikken, og SSH håndterer admin-adgang. UFW er dit eget lag – Cloudflare erstatter det ikke.",
       "diagram": "firewall"
     },
     {
@@ -69,7 +69,7 @@
       "dayTitle": "DNS og firewall",
       "title": "Cloudflare Tunnel",
       "summary": "Din VM behøver ikke åben offentlig IP — trafik kommer gennem en sikker tunnel.",
-      "body": "cloudflared på VM opretter en forbindelse ud til Cloudflare. Brugere besøger https://andrii.mercantec.tech → Cloudflare → tunnel → nginx på localhost:8080. HTTPS håndteres udenfor VM. Det er derfor dig viser Cloudflare-IP, ikke skolens VM-IP.",
+      "body": "Cloudflare Tunnel løser et problem: din VM har ikke en offentlig IP (eller du vil ikke eksponere den). I stedet opretter VM'en selv forbindelsen ud til Cloudflare – som en slags hemmelig bagdør der altid er åben fra VM'ens side.\n\nHvordan trafikken flyder:\nBruger → HTTPS til andrii.mercantec.tech → Cloudflare (HTTPS her) → krypteret tunnel → cloudflared på VM → http://localhost:8080 → nginx\n\nHTTPS-certifikatet håndteres af Cloudflare udadtil. Inde på VM'en går trafikken lokalt på port 8080 – ingen åbne porte mod internettet, ingen offentlig IP nødvendig.\n\nTeacher har opsat DNS og tunnel-routing i Cloudflare dashboard. Du kører cloudflared som container og sørger for at have et sitet på port 8080. Ser du 502? Nginx er nede. Ser du 1033? cloudflared kører ikke.",
       "diagram": "tunnel"
     },
     {
@@ -78,7 +78,7 @@
       "dayTitle": "Docker og database",
       "title": "Docker — hvem er hvem?",
       "summary": "CLI taler til daemon — daemon bygger containere. Tænk tre roller.",
-      "body": "Tre venner i Docker-verdenen:\n\n1. CLI (dig i terminalen) — du skriver docker run, docker build\n2. dockerd (daemon) — robotten på VM der faktisk bygger og starter\n3. Docker (hvalen) — hele systemet der bærer containere\n\nDu skriver kun til CLI. CLI sender besked til daemon. Daemon laver containeren. Du rører aldrig daemon direkte — kun via docker-kommandoer.",
+      "body": "Docker-økosystemet har tre roller, der arbejder sammen – ligesom kaptajnen, maskinrummet og skibet.\n\nDe tre roller:\n• Docker CLI – det du skriver i terminalen (docker run, docker ps, docker logs). Det er din ordre til systemet.\n• dockerd (Docker daemon) – baggrundsprogrammet der rent faktisk udfører ordrerne. Det trækker images fra Docker Hub, bygger dem og starter containere. Tjek status med: sudo systemctl status docker\n• Hvalen (Docker Hub + images) – lageret af færdige opskrifter. Når du kører docker run postgres, henter dockerd postgres-image fra Docker Hub.\n\nHvalen på logoet er ikke tilfældig – den bærer containerne på ryggen. CLI taler til daemon, daemon sørger for resten. Du rører aldrig /var/lib/docker direkte – alt går gennem docker-kommandoen.",
       "diagram": "container"
     },
     {
@@ -87,7 +87,7 @@
       "dayTitle": "Docker og database",
       "title": "Docker CLI",
       "summary": "Kommandoer du skriver: docker run, docker build, docker compose up.",
-      "body": "CLI = Command Line Interface = docker-programmet i terminalen.\n\nEksempler:\n• docker run — start en container fra et image\n• docker build — byg image fra Dockerfile\n• docker compose up — start hele stacken (app + db)\n\nCLI sender dine ønsker til dockerd. Det er budbringeren — ikke selve motoren.",
+      "body": "Docker CLI er budbringeren – det du skriver i terminalen for at give ordrer til Docker. CLI'et snakker med dockerd (baggrundsprogrammet), som faktisk udfører arbejdet.\n\nDe vigtigste kommandoer:\n• docker run – start en container fra et image\n• docker ps – vis kørende containere\n• docker ps -a – vis alle, inklusiv stoppede\n• docker logs containernavn – se hvad der sker inde i containeren\n• docker exec -it postgres psql -U andrii – kør en kommando inde i containeren\n• docker stop / start / rm – styr containerens livscyklus\n• docker compose up – start flere containere defineret i en fil\n\nCLI'et er budbringeren, ikke motoren. Skriver du noget forkert, er det CLI der siger fejl – dockerd har ikke engang set beskeden endnu. Kommandoerne er de samme uanset om du er på Mac (Docker Desktop) eller Linux-server.",
       "diagram": "container"
     },
     {
@@ -96,7 +96,7 @@
       "dayTitle": "Docker og database",
       "title": "Docker daemon (dockerd)",
       "summary": "Baggrundsprogram på VM der bygger images og kører containere.",
-      "body": "dockerd kører som en service på VM (ligesom nginx).\n\nDen gør det tunge arbejde:\n• Henter images fra Docker Hub\n• Bygger nye images fra Dockerfile\n• Starter, stopper og sletter containere\n• Håndterer netværk og volumes\n\nUden dockerd virker ingen docker-kommando. Tjek med: sudo systemctl status docker",
+      "body": "dockerd er baggrundsprogrammet – motoren der rent faktisk kører containere. Du ser det aldrig direkte, men alt du gør med docker-kommandoen går igennem det.\n\ndockerd starter automatisk med serveren og lytter på beskeder fra CLI'et. Det er en systemtjeneste ligesom nginx eller ssh, og du kan tjekke om den kører med: sudo systemctl status docker\n\nHvad dockerd gør:\n• Modtager kommandoer fra CLI\n• Henter images fra Docker Hub (docker pull)\n• Bygger images fra Dockerfile (docker build)\n• Starter, stopper og sletter containere\n• Styrer netværk og volumes\n\nHvis dockerd ikke kører, virker ingen docker-kommandoer. Det er fundamentet hele Docker-økosystemet bygger på. På Ubuntu installeres det med: sudo apt install docker.io og aktiveres med: sudo systemctl enable docker",
       "diagram": "container"
     },
     {
@@ -105,7 +105,7 @@
       "dayTitle": "Docker og database",
       "title": "Docker-container",
       "summary": "En isoleret kasse på hvalens ryg — her bor din app.",
-      "body": "Container = den kasse hvalen bærer. Inde i den kører din app isoleret fra resten af VM.\n\nAnalogi:\n• VM = hele huset\n• Container = et rum i huset\n• App = møblerne i rummet\n\nSlet containeren → alt inde i kassen forsvinder. Medmindre data ligger i et volume (pgdata) — så er det som et skab på væggen udenfor kassen.",
+      "body": "En Docker-container er en isoleret kasse der kører oven på hvalen (Docker-dæmonen). Tænk på det sådan: VM'en er huset, containeren er et rum i huset, og appen er møblerne i rummet.\n\nHver container har sit eget filsystem, sit eget netværk og sine egne processer – men deler kernen med VM'en. Det gør containere hurtigere og lettere end rigtige VM'er.\n\nVigtige egenskaber:\n• En container startes fra et image (opskriften)\n• Containeren er midlertidig – sletter du den, forsvinder data inde i den\n• Vil du gemme data, skal du bruge et volume (-v pgdata:/var/lib/postgresql/data)\n• Flere containere kan køre på samme tid (postgres, cloudflared, nginx)\n\nKommandoer til styring: docker ps viser kørende containere, docker logs postgres viser hvad der sker inde. docker rm sletter containeren, men volume'et overlever.",
       "diagram": "container"
     },
     {
@@ -114,7 +114,7 @@
       "dayTitle": "Docker og database",
       "title": "Docker-image",
       "summary": "Opskriften — skabelon som nye containere kopieres fra.",
-      "body": "Image = fryseopskriften. Container = den færdige ret du serverer.\n\nImage er skrivebeskyttet — du ændrer det ikke direkte. Dockerfile beskriver hvordan image bygges. docker run laver en levende container fra image.\n\nSamme image → mange ens containere. Ny kode? Byg nyt image, start ny container.",
+      "body": "Et Docker-image er opskriften – en skrivebeskyttet skabelon der beskriver præcis hvad en container skal indeholde. Image'et er ikke selve appen der kører, men planen for den.\n\nAnalogien: image = opskrift, container = den ret du laver fra opskriften. Du kan lave mange retter fra samme opskrift – og sletter du retten, er opskriften stadig der.\n\nHvordan images opstår:\n• Download fra Docker Hub: docker pull postgres:16-alpine\n• Byg selv fra en Dockerfile: docker build -t minapp .\n• Dockerfile beskriver trin for trin hvad der skal være i image'et\n\nImages er lagdelt – postgres:16-alpine bygger oven på alpine linux, som igen bygger på et basislag. Samme image kan starte mange containere: én til test, én til produktion. Image ændres ikke når containeren kører – al ny data gemmes i containeren (eller i et volume).",
       "diagram": "image"
     },
     {
@@ -123,7 +123,7 @@
       "dayTitle": "Docker og database",
       "title": "Named volume (pgdata)",
       "summary": "Database-data overlever når container genstartes eller slettes.",
-      "body": "Volume pgdata ligger på VM'ens disk, ikke inde i containeren. Når Postgres-containeren genstartes, monteres samme volume — data er stadig der. Uden volume: hver ny container = tom database.",
+      "body": "Et named volume (som pgdata) er et lagerområde på VM'ens disk, der er koblet til containeren men lever uafhængigt af den. Tænk på det som en ekstern harddisk til databasen.\n\nUden volume: sletter du postgres-containeren, forsvinder alle data for evigt.\nMed volume: sletter du containeren, lever pgdata stadig på VM'ens disk og kan monteres igen.\n\nSådan oprettes det automatisk ved første docker run:\ndocker run -v pgdata:/var/lib/postgresql/data postgres:16-alpine\n\nVolume'et gemmes i /var/lib/docker/volumes/pgdata/_data på VM'en. Du rører ikke den mappe direkte – Docker styrer adgangen.\n\nNyttige kommandoer:\n• docker volume ls – vis alle volumes\n• docker volume inspect pgdata – se Mountpoint (stien på VM)\n• docker volume rm pgdata – slet volume og ALT data (vær forsigtig!)\n\nEfter genstart (docker stop + docker start) monteres pgdata automatisk igen og databasen er præcis som den var.",
       "diagram": "volume"
     },
     {
@@ -132,7 +132,7 @@
       "dayTitle": "Nginx og HTTPS",
       "title": "Nginx",
       "summary": "Webserver på VM der modtager trafik fra tunnel og sender den videre.",
-      "body": "Nginx lytter på 127.0.0.1:8080. Cloudflare tunnel peger hertil. Nginx kan serve statiske filer eller proxy til app (fx /api/ → port 5000). Det er 'reverse proxy' — brugeren ser ét domæne, nginx fordeler internt.",
+      "body": "Nginx er en webserver, der kører direkte på VM'en (installeret med apt, ikke i Docker). Den lytter på adressen 127.0.0.1:8080, fordi Cloudflare-tunnelen sender trafik derind.\n\nDu kan tænke på Nginx som portmanden i en stor bygning: alle besøgende (HTTP-requests) ankommer til ét sted, og portmanden sender dem videre til den rigtige afdeling.\n\nNginx kan gøre to ting på én gang:\n• Servere statiske filer direkte fra /var/www/andrii (HTML, CSS, billeder)\n• Videresende API-requests til din .NET-app via location /api/ → proxy_pass http://127.0.0.1:5000/\n\nKonkrete kommandoer du bruger: sudo nginx -t (test konfiguration), sudo systemctl reload nginx (genindlæs uden nedetid). Konfigurationsfilen ligger i /etc/nginx/sites-available/ og aktiveres med et symlink i sites-enabled/. Nginx er årsagen til at du ser HTTP/2 200 fra domænet — tunnelen rammer Nginx, og Nginx leverer svaret.",
       "diagram": "nginx"
     },
     {
@@ -141,7 +141,7 @@
       "dayTitle": "Nginx og HTTPS",
       "title": "HTTPS ved Cloudflare",
       "summary": "Krypteret forbindelse mellem bruger og Cloudflare — uden Certbot på VM.",
-      "body": "Med tunnel får brugeren HTTPS fra Cloudflare. Mellem Cloudflare og din VM kan trafikken være HTTP på localhost — det er OK i det lukkede setup. Certbot på VM er ofte ikke nødvendig her.",
+      "body": "HTTPS betyder, at al trafik mellem browseren og serveren er krypteret — browseren viser en hængelås. Normalt kræver det et certifikat installeret direkte på serveren via Certbot og Let's Encrypt.\n\nI vores setup er det anderledes. Din VM har ingen offentlig IP-adresse, så Certbot kan ikke bevise over for Let's Encrypt, at du ejer domænet. I stedet klarer Cloudflare krypteringen for dig.\n\nFlowet ser sådan ud:\n• Bruger → HTTPS til Cloudflare (Cloudflare har certifikatet)\n• Cloudflare → krypteret tunnel → cloudflared på VM\n• cloudflared → HTTP på localhost:8080 → Nginx\n\nDen interne del fra tunnel til Nginx er HTTP — og det er okay, fordi den forbindelse aldrig forlader serveren. Brugeren oplever stadig en sikker HTTPS-forbindelse med hængelås. Certbot-teorien lærer du alligevel, fordi den er standarden på servere med en offentlig IP.",
       "diagram": "https"
     },
     {
@@ -150,7 +150,7 @@
       "dayTitle": "Reverse proxy",
       "title": "Reverse proxy",
       "summary": "Én indgang (domæne) — nginx sender forskellige stier til forskellige services.",
-      "body": "location / → app eller statisk side. location /api/ → ASP.NET på port 5000. Brugeren ser kun andrii.mercantec.tech. Nginx er portvagt der videresender requests. Det gør det nemt at tilføje flere backends senere.",
+      "body": "En reverse proxy er som en reception i en stor virksomhed: kunden (browseren) taler kun med receptionen, og receptionen ved præcis, hvilken afdeling der skal håndtere henvendelsen.\n\nI vores setup er Nginx den reverse proxy. Den sidder på 127.0.0.1:8080 og fordeler trafik efter stien i URL'en:\n• location / → serverer statiske filer fra /var/www/andrii direkte\n• location /api/ → sender requesten videre (proxy_pass) til Kestrel på 127.0.0.1:5000\n\nFordelene er tydelige: du har ét domæne (andrii.mercantec.tech) og ét indgangspunkt. Brugeren ved ikke, om svaret kom fra en statisk fil eller fra en .NET-app — Nginx klarer fordelingen. Nginx tilføjer også headers som X-Real-IP og X-Forwarded-Proto, så din app ved, hvem der egentlig kaldte, og om det skete via HTTPS. Cloudflare Tunnel er faktisk også en slags reverse proxy — den sender trafik fra internettet ind til din Nginx.",
       "diagram": "nginx"
     },
     {
@@ -159,7 +159,7 @@
       "dayTitle": "Dockerfile",
       "title": "Dockerfile",
       "summary": "Tekstfil med trin til at bygge dit app-image.",
-      "body": "FROM vælger base image. COPY kopierer kode. RUN kører kommandoer (fx dotnet publish). CMD starter appen. Multi-stage: først SDK til build, så mindre runtime-image uden compiler. Resultat: reproducerbar deploy.",
+      "body": "En Dockerfile er en tekstfil med trin-for-trin-opskrift på, hvordan Docker skal bygge et image af din app. Tænk på det som en kok, der nedskriver præcis, hvordan en ret laves — så enhver anden kok kan lave nøjagtigt den samme ret.\n\nDe vigtigste instruktioner:\n• FROM — hvilket basis-image du bygger ovenpå (f.eks. mcr.microsoft.com/dotnet/sdk:8.0)\n• WORKDIR — den mappe inde i imagen, som de følgende trin arbejder fra\n• COPY — kopierer filer fra din computer ind i imagen\n• RUN — kører en kommando under build (f.eks. dotnet restore)\n• EXPOSE — dokumenterer hvilken port appen lytter på (men åbner den ikke)\n• CMD — den kommando der kører, når containeren starter\n\nFor .NET bruger kurset et multi-stage build: første stage bruger SDK-imagen til at kompilere koden (dotnet publish), anden stage bruger kun runtime-imagen og kopierer den færdige .dll over. Resultatet er et langt mindre og sikrere image — SDK'en (der fylder meget) er ikke med i det endelige image. Du bygger med docker build -t mercantec-api . og kører med docker run.",
       "diagram": "dockerfile"
     },
     {
@@ -168,7 +168,7 @@
       "dayTitle": "Docker Compose",
       "title": "Docker Compose",
       "summary": "Én fil der starter app + database sammen med netværk og volumes.",
-      "body": "docker-compose.yml beskriver services: app og db.\n\nCompose gør tre ting:\n1. Bygger app-image fra Dockerfile (build: .)\n2. Henter postgres-image færdig fra Docker Hub\n3. Starter begge på samme netværk — app kan bruge hostname db til Postgres\n\nenv_file læser .env. depends_on venter på at db er healthy. Én kommando: docker compose up -d.\n\nnginx og cloudflared er IKKE i compose — de kører på VM som før.",
+      "body": "Docker Compose lader dig beskrive hele din applikation — app og database — i én enkelt YAML-fil kaldet docker-compose.yml. I stedet for at huske og skrive mange lange docker run-kommandoer starter du det hele med én kommando: docker compose up -d --build.\n\nFilen definerer services. I vores projekt er der typisk to:\n• db — bruger det færdige postgres:16-alpine image og gemmer data i named volume pgdata\n• app — bygges fra Dockerfile i samme mappe og eksponeres på 127.0.0.1:5000\n\nCompose opretter automatisk et fælles netværk til begge services. Det betyder, at app-containeren kan nå databasen ved at bruge servicenavnet db som hostname — ikke localhost. Det er en vigtig forskel: localhost inde i en container peger på containeren selv, ikke på VM'en.\n\nEnvironment-variabler (fx DB_PASSWORD) sættes i en .env-fil, der aldrig må komme i git. Compose kan vente på, at databasen er klar, via depends_on og healthcheck. Nginx og cloudflared kører ikke i Compose i vores setup — de er tæt knyttet til VM'en og host-netværket.",
       "diagram": "compose"
     },
     {
@@ -177,7 +177,7 @@
       "dayTitle": "CI/CD og Dokploy",
       "title": "GitHub Actions (CI)",
       "summary": "Automatisk build-test hver gang du pusher til GitHub.",
-      "body": "Workflow i .github/workflows/ci.yml kører ved push/PR. Typisk: docker build af Dockerfile. CI = Continuous Integration — fejl fanges før deploy. Det beviser at image kan bygges, ikke at alt virker i produktion.",
+      "body": "GitHub Actions er et CI-system (Continuous Integration) der automatisk kører en build og test, hver gang du pusher kode til GitHub. Du definerer det i en fil under .github/workflows/ i dit repo.\n\nNår du pusher til main, starter GitHub en runner (en midlertidig Ubuntu-VM hos GitHub) og udfører de trin, du har defineret — for eksempel:\n• Hent koden (actions/checkout)\n• Byg Docker-imagen med docker build\n• Push imagen til GHCR (GitHub Container Registry)\n\nCI er din kvalitetskontrol: hvis Dockerfile er ødelagt, eller koden ikke kompilerer, fejler buildet, og du ser det med det samme i GitHub-fanebladet Actions — inden noget rammer serveren. Det er en vigtig pointe: grønt CI beviser kun, at imagen kan bygges. Det beviser ikke, at appen opfører sig korrekt i produktion. Til det skal du stadig tjekke logs og lave en smoke-test. Secrets som GITHUB_TOKEN bruges til at logge ind på registryet og gemmes sikkert i GitHub, ikke i koden.",
       "diagram": "cicd"
     },
     {
@@ -186,7 +186,7 @@
       "dayTitle": "CI/CD og Dokploy",
       "title": "Dokploy (CD)",
       "summary": "Panel på VM der deployer fra Git når der pushes — uden manuel ssh.",
-      "body": "Dokploy læser repo, bygger/kører compose, holder containers kørende. Webhook fra GitHub ved push → redeploy på ~1 min. CD = Continuous Deployment. Du arbejder på Mac, Dokploy opdaterer VM.",
+      "body": "Dokploy er et selvhostet deploy-panel, der kører på din VM. Du kobler det til dit GitHub-repo, og så kan Dokploy hente koden og køre docker compose op — helt automatisk, uden at du behøver SSH ind på serveren.\n\nDu kan se det som en stor grøn deploy-knap: ét tryk (eller et automatisk webhook-signal fra GitHub) sætter hele processen i gang. Dokploy læser din docker-compose.yml, bygger eller henter imagen, starter containers og håndterer volumes og env-variabler via sit UI.\n\nDokploy er CD-delen (Continuous Deployment) i vores setup:\n• CI = GitHub Actions (build og test ved push)\n• CD = Dokploy (deploy til VM ved push)\n\nHvis du sætter en webhook op, går det omtrent sådan: du pusher kode → GitHub kalder Dokploy via webhook → Dokploy deployer inden for ca. 1 minut. Det erstatter den manuelle rutine: ssh → git pull → docker compose up. Nginx og cloudflared-tunnel kører stadig selvstændigt på VM'en — Dokploy erstatter dem ikke.",
       "diagram": "dokploy"
     },
     {
@@ -195,7 +195,7 @@
       "dayTitle": "CI/CD og Dokploy",
       "title": "Webhook",
       "summary": "GitHub råber til Dokploy: der var et push!",
-      "body": "Webhook URL i GitHub Settings. Ved push sender GitHub JSON til Dokploy. Vigtigt: Content-Type application/json. Dokploy starter deploy. Uden webhook: manuel redeploy i UI.",
+      "body": "En webhook er en måde for GitHub at råbe op til Dokploy, hver gang du pusher ny kode. I stedet for at Dokploy selv konstant spørger GitHub \"er der noget nyt?\", sender GitHub aktivt en besked til Dokploy i det øjeblik, noget sker.\n\nDet fungerer sådan:\n1. Du kopierer en webhook-URL fra Dokploy (den indeholder et hemmeligt token)\n2. Du indsætter URL'en i GitHub under Settings → Webhooks → Add webhook\n3. Du sætter Content-Type til application/json, og vælger Push som event\n4. Nu sender GitHub automatisk et JSON-payload til Dokploy, hver gang du pusher til main\n5. Dokploy modtager kaldet og starter et nyt deploy\n\nUden webhook skal du enten manuelt trykke \"Deploy\" i Dokploy-UI'et eller SSH'e ind på serveren og køre compose op selv. Med webhook er hele kæden automatisk: push → GitHub kalder webhook → Dokploy deployer → appen er opdateret inden for ca. 1 minut.",
       "diagram": "cicd"
     },
     {
@@ -204,7 +204,7 @@
       "dayTitle": "Kubernetes og backup",
       "title": "Pod (Kubernetes)",
       "summary": "Mindste enhed i K8s — som en container, men styret af cluster.",
-      "body": "En pod kører typisk én container (app eller db). Kubernetes genstarter pods, balancerer belastning. I bruger Compose + Dokploy på VM — ikke K3s — men idéen er den samme: beskriv hvad der skal køre, systemet holder det oppe.",
+      "body": "En pod er den mindste enhed i Kubernetes – tænk på det som en lille børnehave, hvor hvert barn er en container.\n\nNormalt kører én container per pod, men de kan dele netværk og lager. Kubernetes sørger for, at pods kører som planlagt: hvis en pod crasher, starter den automatisk igen.\n\nI et cluster kan du have mange pods fordelt på flere servere:\n• Deployment beskriver hvad der skal køre og hvor mange kopier (replicas)\n• Service giver pods et stabilt netværknavn, fx \"proxi-db:5432\"\n• Ingress (fx Traefik i K3s) sender HTTP-trafik ind til den rigtige service\n\nI Proxi-demo kører appen med 3 replicas – 3 pods. Traefik fordeler trafikken mellem dem (load balancing). Postgres kører som 1 pod med en PersistentVolumeClaim, så data overlever restart.\n\nI vores hverdag bruger vi Docker Compose og Dokploy, men ideen er den samme: beskriv hvad du vil have kørende – systemet holder det i live.",
       "diagram": "k8s"
     },
     {
@@ -213,7 +213,7 @@
       "dayTitle": "Kubernetes og backup",
       "title": "pg_dump backup",
       "summary": "Kopi af database til fil — uden for selve volume.",
-      "body": "pg_dump eksporterer SQL til ~/backup_YYYYMMDD.sql på VM. Hvis volume ødelægges, kan du genskabe fra fil. Volume = live data; backup = ekstra sikkerhedskopi. Kør jævnligt i produktion.",
+      "body": "En database-volume er som et skrivebord med alle dine vigtige papirer. Hvis serveren bryder ned eller du sletter containeren ved en fejl, er papirerne væk – medmindre du har taget en kopi.\n\npg_dump laver netop den kopi. Kommandoen tager et øjebliksbillede af hele databasen og gemmer det som en SQL-fil udenfor volumet:\n\n• Kør: docker compose exec -T db pg_dump -U andrii postgres > ~/backup_$(date +%Y%m%d).sql\n• Filen hedder fx backup_20260615.sql og ligger på VM'en\n• Restore: cat backup.sql | docker exec -i db psql -U andrii -d postgres\n\nVolumen er din live-database – den kører hele tiden. Backup-filen er ekstra sikkerhed: hvis noget går galt (fejl, angreb, uheld med docker compose down -v), kan du genskabe data.\n\nKør backup jævnligt – og test at du faktisk KAN restore. En backup du ikke har testet, er ikke en backup.",
       "diagram": "volume"
     },
     {
@@ -222,7 +222,7 @@
       "dayTitle": "Monitoring og logging",
       "title": "Monitoring",
       "summary": "Er systemet oppe? Bruger CPU/RAM normalt?",
-      "body": "Dokploy viser container status (Running/Exited) og ressourcer. Uptime Kuma pinger din URL udefra hvert 60. sek. Monitoring svarer på: lever det? Uden det opdager du nedetid først fra brugere.",
+      "body": "Monitoring svarer på ét simpelt spørgsmål: \"Kører systemet som forventet?\"\n\nI Dokploy kan du se for hvert projekt:\n• Container status: Running, Exited eller Restarting (crash loop)\n• CPU og RAM per container\n• Deploy history – hvornår kørte sidst build, og gik det godt?\n\nHundehuset holder øje med din app indeni serveren. Uptime Kuma er en udefra-kommende nabo, der pinger din offentlige URL hvert minut og råber op, hvis der ikke kommer svar.\n\nForskellen er vigtig: Dokploy kan vise \"Running\", mens brugere slet ikke kan nå siden – fx hvis Cloudflare-tunnelen er nede. Uptime Kuma opdager det, Dokploy gør det ikke.\n\nBrug begge: Dokploy til intern status og ressourceforbrug, Uptime Kuma til \"ser brugeren siden?\"",
       "diagram": "monitoring"
     },
     {
@@ -231,7 +231,7 @@
       "dayTitle": "Monitoring og logging",
       "title": "Logging",
       "summary": "Hvad skrev applikationen? Fejl, start, advarsler.",
-      "body": "Containers skriver til stdout/stderr. Dokploy Logs viser det. Når noget går galt, læser du logs for at finde årsagen. Log aldrig passwords eller tokens i produktion.",
+      "body": "Logging er appens dagbog – alt hvad den skriver til skærmen (stdout/stderr) mens den kører.\n\nDokploy samler disse beskeder og viser dem under fanen \"Logs\" for din app-container. Du behøver ikke SSH for at læse dem.\n\nTypiske log-linjer:\n• INFO: \"App startet på port 5000\"\n• ERROR: \"Database connection failed\"\n• 500 Internal Server Error med stack trace\n\nNår noget går galt, kig altid i Logs – de sidste linjer før et crash fortæller normalt hvad der gik galt.\n\nTo vigtige regler:\n1. Log de rigtige ting: fejl, auth-hændelser, vigtige flows\n2. Log ALDRIG passwords, tokens eller persondata – logs kan læses af mange og kopieres til andre steder\n\nOWASP kalder manglende logging for A09 – det er en reel sårbarhed, fordi du ikke kan opdage et angreb, du ikke ser.",
       "diagram": "monitoring"
     },
     {
@@ -240,7 +240,7 @@
       "dayTitle": "Monitoring og logging",
       "title": "Uptime Kuma",
       "summary": "Ekstern overvågning — tjekker om URL svarer 200 udefra.",
-      "body": "Kuma kører separat på VM (ikke i app compose). Den tester hele vejen: Cloudflare → tunnel → nginx → app. Dokploy ser inde i container; Kuma ser hvad brugeren ser.",
+      "body": "Uptime Kuma er som en vagt, der sidder udenfor bygningen og banker på døren hvert minut. Hvis ingen åbner, sender den alarm.\n\nDen tester hele vejen fra internettet: Cloudflare → tunnel → nginx → din app. Det er præcis hvad en rigtig bruger oplever – ikke hvad Dokploy ser indefra serveren.\n\nSådan fungerer det:\n• Du tilføjer en monitor med din URL, fx https://andrii.mercantec.tech/api/weatherforecast\n• Hvert N sekunder sender Kuma en HTTP-forespørgsel\n• Svarer appen med 200 OK → grønt. Timeout eller fejl → rødt og notifikation (email, Discord, Telegram)\n\nKombination med Dokploy:\n• Dokploy: er containeren Running? Hvad skrev appen?\n• Uptime Kuma: kan brugere rent faktisk nå siden?\n\nEt eksempel fra vores setup: appen kan køre fint i Docker, men tunnelen giver 530 – Dokploy viser \"Running\", Kuma viser \"Down\". Det er det, Kuma fanger.",
       "diagram": "monitoring"
     },
     {
@@ -249,7 +249,7 @@
       "dayTitle": "OWASP og headers",
       "title": "OWASP Top 10",
       "summary": "Liste over de mest kritiske web-sårbarheder.",
-      "body": "OWASP samler typiske fejl: broken access control, injection, misconfiguration osv. Du behøver ikke huske alle detaljer — men kunne navngive flere og foreslå fix. Det er risikovurdering for webapps.",
+      "body": "OWASP (Open Web Application Security Project) udgiver hvert par år en liste over de 10 mest kritiske web-sikkerhedsrisici. Det er ikke en liste over specifikke bugs – det er klasser af problemer, som går igen på tværs af alle typer apps.\n\nDe 10 kategorier fra 2021 (dem vi bruger på kurset):\n• A01 Broken Access Control – brugeren ser data, de ikke må se\n• A02 Cryptographic Failures – svag kryptering, nøgler i git\n• A03 Injection – brugerinput bliver til SQL eller kode\n• A04 Insecure Design – ingen rate limiting, ingen bot-beskyttelse\n• A05 Security Misconfiguration – manglende headers, standard-passwords\n• A06 Outdated Components – kendte CVE i biblioteker (Day 12: Trivy)\n• A07 Auth Failures – svage passwords, ingen 2FA\n• A08 Software Integrity – usikker CI/CD supply chain\n• A09 Logging Failures – ingen logs = ingen opdagelse af angreb\n• A10 SSRF – serveren henter URLs på vegne af angriberen\n\nFor vores MercantecApi er A01, A03, A05, A06 og A09 de mest relevante at fokusere på.",
       "diagram": "owasp"
     },
     {
@@ -258,7 +258,7 @@
       "dayTitle": "OWASP og headers",
       "title": "Security headers",
       "summary": "HTTP-headers der fortæller browseren hvordan siden må bruges.",
-      "body": "CSP begrænser scripts. HSTS tvinger HTTPS. X-Frame-Options beskytter mod clickjacking. Sat i nginx med add_header. De reducerer skade ved XSS og misconfiguration (A05).",
+      "body": "HTTP security headers er instruktioner, som serveren sender til browseren: \"Herfra må du hente scripts\", \"Brug kun HTTPS\", \"Vis ikke siden i en iframe\".\n\nBrowseren følger disse regler – det reducerer skaden, selv hvis en angriber får injiceret kode.\n\nDe vigtigste headers og hvad de gør:\n• Content-Security-Policy (CSP): bestemmer hvorfra scripts, styles og billeder må hentes. Blokerer mange XSS-angreb.\n• Strict-Transport-Security (HSTS): fortæller browseren at bruge HTTPS i fx 1 år – ingen HTTP-fallback.\n• X-Frame-Options: forhindrer at siden vises i en fremmed iframe (clickjacking-angreb).\n• X-Content-Type-Options: browseren gætter ikke på filtype – kun hvad serveren siger.\n\nI vores setup sættes de i nginx-konfigurationen på VM'en med add_header ... always; inde i server-blokken. Tjek med curl -sI https://andrii.mercantec.tech/ om de er til stede.\n\nHeaders er en del af OWASP A05 (Security Misconfiguration) – manglende headers er en konfigurationsfejl, ikke en kodefejl.",
       "diagram": "headers"
     },
     {
@@ -267,7 +267,7 @@
       "dayTitle": "Container security",
       "title": "Environment variables vs secrets",
       "summary": "Env til konfiguration; secrets til passwords og nøgler.",
-      "body": "ASPNETCORE_ENVIRONMENT=Production er OK i env. DB_PASSWORD hører i .env (ikke i git) eller Dokploy secrets. docker inspect kan læse env — derfor er følsomme data ikke 'sikre' bare fordi de er env vars.",
+      "body": "Env-variabler og secrets løser begge det samme problem – sende konfiguration ind i en container – men de er ikke ens sikre.\n\nEnv-variabler er synlige: enhver med adgang til Docker på serveren kan køre docker inspect og læse alle env-værdier i klartekst. Brug dem til ikke-hemmelige indstillinger som ASPNETCORE_ENVIRONMENT=Production eller LOG_LEVEL=info.\n\nSecrets – passwords, API-nøgler, private certs – bør aldrig stå i env direkte:\n• Brug en .env-fil på serveren (aldrig i git!)\n• Sæt dem i Dokploys Environment-UI ved deploy\n• I Docker Swarm og Kubernetes er der dedikeret secrets-mekanisme med kryptering\n\nHvad du aldrig må gøre:\n• ENV DB_PASSWORD=hemmelighed i Dockerfile – det brændes ind i image-laget\n• Passwords i docker-compose.yml tjekket ind i GitHub\n\nVores setup: DB_PASSWORD og connection strings ligger i .env på VM'en og er i .gitignore. Tjek med git status at filen ikke er sporet.",
       "diagram": "secrets"
     },
     {
@@ -276,7 +276,7 @@
       "dayTitle": "Container security",
       "title": "Trivy scan",
       "summary": "Scanner Docker-images for kendte sårbarheder (CVE).",
-      "body": "trivy image postgres:16-alpine viser CRITICAL/HIGH/MEDIUM. Det dækker OWASP A06 (outdated components). Fix: opdater base image og NuGet, byg igen, scan igen. Gør det før produktion.",
+      "body": "Trivy er et gratis open source-værktøj, der scanner et Docker-image lag for lag og leder efter kendte sårbarheder (CVE) i OS-pakker og app-biblioteker.\n\nEt image som postgres:16-alpine indeholder hundredvis af pakker. Trivy slår dem alle op i CVE-databaser og fortæller dig hvad der er risikabelt.\n\nSådan bruger du det:\n• brew install trivy (Mac) eller sudo apt install trivy (VM)\n• trivy image postgres:16-alpine\n• trivy image mcr.microsoft.com/dotnet/aspnet:8.0\n\nOutputtet viser CVE-ID, severity (CRITICAL, HIGH, MEDIUM, LOW), hvilken pakke og om der er en fixed version.\n\nWorkflow: scan → se CRITICAL/HIGH → opdater base image eller pakker → rebuild → scan igen.\n\nDette er direkte modgift mod OWASP A06 (Vulnerable and Outdated Components). Du kan også bruge dotnet list package --vulnerable til NuGet-pakker i selve .NET-projektet – begge niveauer skal tjekkes.",
       "diagram": "trivy"
     },
     {
@@ -285,7 +285,7 @@
       "dayTitle": "Container security",
       "title": "Kør ikke som root",
       "summary": "App i container bør køre som almindelig bruger — ikke root.",
-      "body": "Standard images kører ofte som root. Hvis angriber kommer ind, har de flere rettigheder. Dockerfile kan tilføje USER appuser. Mindre skade ved kompromis.",
+      "body": "Som standard kører processen inde i en Docker-container som root – systemets administrator. Det er praktisk, men farligt.\n\nHvis en angriber finder en fejl i din app og kan eksekvere kode, har de øjeblikkeligt root-rettigheder inde i containeren. Det giver langt mere skadepotentiale: læse alle filer, installere tools, forsøge at eskalere til host-systemet.\n\nLøsningen er enkel – tilføj en ikke-privilegeret bruger i Dockerfile:\n\nRUN adduser --disabled-password appuser\nUSER appuser\n\nEfter det kører appen som appuser med minimale rettigheder. Tjek hvem der faktisk kører: docker exec <container> whoami.\n\nPrincippet hedder \"least privilege\" – giv kun de rettigheder der er strengt nødvendige. Vores nuværende MercantecApi Dockerfile mangler endnu USER-linjen – det er et punkt i security-checklisten til Day 12.\n\nMinimalt base image hjælper også: alpine-varianter har færre pakker og dermed færre potentielle angrebsveje.",
       "diagram": "container"
     },
     {
@@ -294,7 +294,7 @@
       "dayTitle": "CTF",
       "title": "CTF (Capture The Flag)",
       "summary": "Praktisk øvelse: find og udnyt sårbarheder i en test-app.",
-      "body": "Du angriber bevidst en sårbar app for at finde flags (skjulte strenge). Metode: recon → test → exploit → dokumenter. Kun på teacher's CTF — aldrig på rigtige systemer uden tilladelse. Lærer dig at forsvare bedre.",
+      "body": "CTF – Capture The Flag – er en kontrolleret skattejagt, hvor målet er at finde og udnytte sårbarheder i en app, som er lavet til formålet.\n\nEn \"flag\" er en skjult streng, fx FLAG{sqli_win}, som beviser at du har udnyttet en sårbarhed. Teacher giver adgang til CTF-appen – du angriber kun den, aldrig rigtige systemer.\n\nMetodik fra recon til exploit:\n1. Recon – kortlæg alle sider, formularer, API-endpoints, cookies og headers\n2. Analyse – hvilket OWASP-mønster passer til hvert endpoint?\n3. Test – én hypotese ad gangen, noter payload og svar\n4. Exploit – bring angrebet hele vejen til flaget\n5. Dokumenter – type, URL, payload, impact og fix\n\nTypiske teknikker på kurset: SQL injection (A03), XSS (A03), IDOR (A01), exposed files som .env eller backup.sql (A05).\n\nEtik er ufravigelig: kun den udleverede CTF-app, ingen DoS, del fund i gruppen. Pointen er at forstå angrebet indefra – så du kan lukke de samme huller i dit eget projekt.",
       "diagram": "ctf"
     },
     {
@@ -303,7 +303,7 @@
       "dayTitle": "CTF",
       "title": "SQL injection",
       "summary": "Brugerinput bliver til SQL-kode — database kan lække eller ødelægges.",
-      "body": "Farligt: 'SELECT * FROM users WHERE id = ' + input. Sikker: parametriserede queries. I CTF tester du med ' OR '1'='1. I din egen app: altid ORM/parameters.",
+      "body": "SQL injection opstår, når brugerinput sættes direkte ind i en SQL-forespørgsel som tekst – i stedet for som et sikkert parameter. Databasen ser det som kode, ikke som data.\n\nKlassisk eksempel på den farlige version:\n\"SELECT * FROM users WHERE id = \" + userId\n\nHvis en angriber skriver 1; DROP TABLE users;-- som userId, slettes hele tabellen. Endnu mere almindeligt er login-bypass med ' OR '1'='1, som gør betingelsen altid sand.\n\nDen sikre løsning er parametriserede queries, hvor input aldrig blandes med SQL-koden:\n• Python: cursor.execute(\"SELECT * FROM users WHERE id = %s\", (userId,))\n• ASP.NET/EF Core: brug LINQ eller FromSqlRaw med parametre – aldrig string-sammensætning\n\nI CTF (Day 13) bruges SQLi aktivt til at finde flags. I din egen app er det en OWASP A03-risiko med potentielt katastrofalt impact – datalæk, data-sletning, fuld databaseadgang.\n\nKør altid input-validering på vej ind og brug ORM eller prepared statements. Ingen undtagelser.",
       "diagram": "owasp"
     },
     {
@@ -312,7 +312,7 @@
       "dayTitle": "Incident response",
       "title": "Incident response plan",
       "summary": "Forud aftalt plan når noget går galt — ikke panik.",
-      "body": "Faser: Detect (opdag) → Contain (inddæm) → Eradicate (fjern årsag) → Recover (genopret) → Post-incident (lær af det). Kort liste: hvem gør hvad, hvor er logs, hvordan skifter vi passwords.",
+      "body": "En incident response-plan (IRP) er en forud aftalt køreplan for, hvad du gør, når noget går galt – inden det sker. Uden plan opstår kaos: ingen ved hvem der gør hvad, passwords glemmes skiftet, og der er ingen tidslinje til dokumentation.\n\nDe 5 faser vi bruger på kurset:\n1. Detect – Uptime Kuma viser rødt, Dokploy logs viser fejl, bruger klager\n2. Contain – stop containeren, blokér IP med UFW, revokér kompromitteret PAT eller password\n3. Eradicate – patch CVE, ret misconfiguration, fjern malware\n4. Recover – redeploy, restore database fra pg_dump backup, verificér med curl og Kuma\n5. Post-incident – skriv en kort rapport: hvad skete, hvad lærte vi, opdatér planen\n\nFor vores MercantecApi-setup: hvis Kuma viser Down og API giver 502, er første skridt at tjekke cloudflared-tunnelen (docker restart cloudflared), dernæst nginx og app-containeren.\n\nEn simpel checkliste er allerede en IRP. Den behøver ikke fylde mange sider.",
       "diagram": "incident"
     },
     {
@@ -321,7 +321,7 @@
       "dayTitle": "Incident response",
       "title": "Security log analysis",
       "summary": "Læs logs med sikkerhedsbriller — mønstre der kan være angreb.",
-      "body": "Mange 404 fra én IP = scanning. Mange 401/403 = brute force. SQL-fejl i logs = mulig injection. Dokploy Logs + nginx access.log. Kombiner med Uptime Kuma alerts.",
+      "body": "Security log analysis handler om at læse de samme logs som ved normal drift – men med detektivbriller på og lede efter mønstre, der tyder på angreb eller misbrug.\n\nVigtige signaler at kigge efter:\n• Mange 404-fejl fra ét IP: nogen scanner efter skjulte filer som /admin, /.env, /backup.sql\n• Mange 401/403-svar: brute force på login eller IDOR-forsøg\n• SQL-fejl med brugerinput i fejlteksten: injection-forsøg (A03)\n• Mærkelige User-Agents som sqlmap eller nikto: automatiserede scanningsværktøjer\n• Pludselig trafikstigning: viral trafik eller DDoS\n\nHvor kigger vi i vores setup:\n• Dokploy Logs (app-container): runtime-fejl og app-output\n• /var/log/nginx/access.log på VM: alle HTTP-requests med IP, sti og statuskode\n• Uptime Kuma events: hvornår var siden Down?\n\nKommando til hurtig analyse: sudo tail -200 /var/log/nginx/access.log | awk '{print $1, $7, $9}' | sort | uniq -c | sort -rn | head -20\n\nHusk: log aldrig passwords eller tokens – logs er potentielt synlige for mange og kan kopieres.",
       "diagram": "monitoring"
     }
   ]
