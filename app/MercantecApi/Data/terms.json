@@ -6,23 +6,55 @@
       "dayTitle": "SSH og VM",
       "title": "SSH",
       "summary": "Sikker forbindelse fra din Mac til serveren uden adgangskode i klartekst.",
-      "body": "SSH (Secure Shell) lader dig logge ind på VM'en fra terminalen. Du bruger et nøglepar: privat nøgle på Mac, offentlig nøgle på serveren. Det er som en digital nøgle — kun du kan åbne døren. På kurset: ssh mercantec-andrii → andrii@VM.",
+      "body": "SSH (Secure Shell) lader dig logge ind på VM'en fra terminalen.\n\nSådan virker det:\n1. Du skriver ssh mercantec-andrii på Mac\n2. Serveren siger: bevis at du har nøglen\n3. Mac signerer med din private nøgle (nøglen sendes aldrig over nettet)\n4. Serveren tjekker med din offentlige nøgle i authorized_keys\n5. OK → du er inde\n\nDet er som en digital nøgle — kun du kan åbne døren. Port 22 er kun til admin, ikke til hjemmesiden.",
+      "diagram": "ssh"
+    },
+    {
+      "id": "vm-basics",
+      "day": 1,
+      "dayTitle": "SSH og VM",
+      "title": "VM og Ubuntu",
+      "summary": "En VM er en mini-computer i datacentret — du styrer den over nettet.",
+      "body": "VM / VPS = en lille computer hos skolen, som du logger ind på fra Mac.\n\nUbuntu er operativsystemet på den computer — som Linux, bare fjernstyret.\n\nAnalogi: VM er hele huset. Docker-containere (senere) er rum inde i huset.",
+      "diagram": "vm"
+    },
+    {
+      "id": "ssh-keys",
+      "day": 1,
+      "dayTitle": "SSH og VM",
+      "title": "SSH-nøglepar",
+      "summary": "Privat nøgle på Mac + offentlig nøgle på server = login uden password.",
+      "body": "Du har to nøgler:\n• Privat nøgle — bliver på din Mac (aldrig del den)\n• Offentlig nøgle — ligger i authorized_keys på VM\n\nNår password-login er slået fra, virker kun nøglen. Uden privat nøgle på Mac kan ingen logge ind — heller ikke med det rigtige password.",
       "diagram": "ssh"
     },
     {
       "id": "vm-hardening",
       "day": 1,
-      "dayTitle": "SSH og VM",
-      "title": "VM hardening",
       "summary": "Gør serveren sværere at angribe fra start.",
       "body": "Hardening betyder at lukke unødvendige døre: root kan ikke logge ind via SSH, adgangskode-login er slået fra, kun SSH-nøgle virker. Mindre angrebsflade = færre måder for en angriber at komme ind.",
       "diagram": "vm"
     },
     {
-      "id": "ufw",
+      "id": "dns-basics",
       "day": 2,
       "dayTitle": "DNS og firewall",
-      "title": "UFW firewall",
+      "title": "DNS",
+      "summary": "Internettets telefonbog — oversætter domænenavn til hvor trafikken skal hen.",
+      "body": "Når du skriver andrii.mercantec.tech, spørger browseren DNS: hvor skal jeg hen?\n\nHos os peger DNS til Cloudflare — ikke direkte til VM'ens IP. Derfor viser dig Cloudflare's IP, ikke skolens interne IP. Det er normalt med tunnel.",
+      "diagram": "tunnel"
+    },
+    {
+      "id": "cloudflared",
+      "day": 2,
+      "dayTitle": "DNS og firewall",
+      "title": "cloudflared",
+      "summary": "Lille program på VM der holder tunnelen åben til Cloudflare.",
+      "body": "cloudflared kører som container med --network host.\n\nDen laver en udgående forbindelse til Cloudflare (VM behøver ikke åben port 8080 i UFW). Når en bruger besøger dit domæne, sender Cloudflare request gennem tunnelen → cloudflared → nginx på localhost:8080.\n\n502 = tunnel OK, men nginx/app svarer ikke. 1033 = tunnel/cloudflared nede.",
+      "diagram": "tunnel"
+    },
+    {
+      "id": "ufw",
+      "day": 2,
       "summary": "Brandvæg på VM — kun tilladte porte må ind.",
       "body": "UFW (Uncomplicated Firewall) blokerer indgående trafik som standard. Du åbner kun det nødvendige: 22 (SSH), 80 og 443 (web). Postgres og app på 127.0.0.1 er ikke åbne mod internettet — det er bevidst.",
       "diagram": "firewall"
@@ -37,12 +69,39 @@
       "diagram": "tunnel"
     },
     {
+      "id": "docker-ecosystem",
+      "day": 3,
+      "dayTitle": "Docker og database",
+      "title": "Docker — hvem er hvem?",
+      "summary": "CLI taler til daemon — daemon bygger containere. Tænk tre roller.",
+      "body": "Tre venner i Docker-verdenen:\n\n1. CLI (dig i terminalen) — du skriver docker run, docker build\n2. dockerd (daemon) — robotten på VM der faktisk bygger og starter\n3. Docker (hvalen) — hele systemet der bærer containere\n\nDu skriver kun til CLI. CLI sender besked til daemon. Daemon laver containeren. Du rører aldrig daemon direkte — kun via docker-kommandoer.",
+      "diagram": "container"
+    },
+    {
+      "id": "docker-cli",
+      "day": 3,
+      "dayTitle": "Docker og database",
+      "title": "Docker CLI",
+      "summary": "Kommandoer du skriver: docker run, docker build, docker compose up.",
+      "body": "CLI = Command Line Interface = docker-programmet i terminalen.\n\nEksempler:\n• docker run — start en container fra et image\n• docker build — byg image fra Dockerfile\n• docker compose up — start hele stacken (app + db)\n\nCLI sender dine ønsker til dockerd. Det er budbringeren — ikke selve motoren.",
+      "diagram": "container"
+    },
+    {
+      "id": "docker-daemon",
+      "day": 3,
+      "dayTitle": "Docker og database",
+      "title": "Docker daemon (dockerd)",
+      "summary": "Baggrundsprogram på VM der bygger images og kører containere.",
+      "body": "dockerd kører som en service på VM (ligesom nginx).\n\nDen gør det tunge arbejde:\n• Henter images fra Docker Hub\n• Bygger nye images fra Dockerfile\n• Starter, stopper og sletter containere\n• Håndterer netværk og volumes\n\nUden dockerd virker ingen docker-kommando. Tjek med: sudo systemctl status docker",
+      "diagram": "container"
+    },
+    {
       "id": "docker-container",
       "day": 3,
       "dayTitle": "Docker og database",
       "title": "Docker-container",
-      "summary": "En isoleret 'æske' med din app og det den skal bruge for at køre.",
-      "body": "En container kører et image. Alt indeni er adskilt fra resten af VM'en. Hvis du sletter containeren, forsvinder data inde i den — medmindre du bruger et volume. Tænk: flybar kasse vs. fast skab på væggen (volume).",
+      "summary": "En isoleret kasse på hvalens ryg — her bor din app.",
+      "body": "Container = den kasse hvalen bærer. Inde i den kører din app isoleret fra resten af VM.\n\nAnalogi:\n• VM = hele huset\n• Container = et rum i huset\n• App = møblerne i rummet\n\nSlet containeren → alt inde i kassen forsvinder. Medmindre data ligger i et volume (pgdata) — så er det som et skab på væggen udenfor kassen.",
       "diagram": "container"
     },
     {
@@ -50,8 +109,8 @@
       "day": 3,
       "dayTitle": "Docker og database",
       "title": "Docker-image",
-      "summary": "Opskriften / skabelonen som containers bygges fra.",
-      "body": "Et image er skrivebeskyttet lag: OS-basis + din app. Dockerfile beskriver hvordan image bygges. docker run starter en container fra image. Samme image → mange ens containers. Opdater app = byg nyt image, start ny container.",
+      "summary": "Opskriften — skabelon som nye containere kopieres fra.",
+      "body": "Image = fryseopskriften. Container = den færdige ret du serverer.\n\nImage er skrivebeskyttet — du ændrer det ikke direkte. Dockerfile beskriver hvordan image bygges. docker run laver en levende container fra image.\n\nSamme image → mange ens containere. Ny kode? Byg nyt image, start ny container.",
       "diagram": "image"
     },
     {
@@ -105,7 +164,7 @@
       "dayTitle": "Docker Compose",
       "title": "Docker Compose",
       "summary": "Én fil der starter app + database sammen med netværk og volumes.",
-      "body": "docker-compose.yml beskriver services: app og db. Compose opretter et netværk — app kan bruge hostname db til Postgres. env_file læser .env. depends_on venter på at db er healthy. docker compose up -d starter hele stacken.",
+      "body": "docker-compose.yml beskriver services: app og db.\n\nCompose gør tre ting:\n1. Bygger app-image fra Dockerfile (build: .)\n2. Henter postgres-image færdig fra Docker Hub\n3. Starter begge på samme netværk — app kan bruge hostname db til Postgres\n\nenv_file læser .env. depends_on venter på at db er healthy. Én kommando: docker compose up -d.\n\nnginx og cloudflared er IKKE i compose — de kører på VM som før.",
       "diagram": "compose"
     },
     {

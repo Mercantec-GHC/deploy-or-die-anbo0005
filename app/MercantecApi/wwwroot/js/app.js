@@ -74,8 +74,15 @@
       "<h2>" + escapeHtml(t.title) + "</h2>" +
       '<p class="meta">Dag ' + t.day + " · " + escapeHtml(t.dayTitle) + "</p>" +
       '<p class="lead">' + escapeHtml(t.summary) + "</p>" +
-      renderDiagram(t.diagram) +
-      '<p class="body">' + escapeHtml(t.body) + "</p>";
+      renderIllustration(t.diagram) +
+      '<div class="body">' + formatBody(t.body) + "</div>";
+  }
+
+  function formatBody(text) {
+    return escapeHtml(text || "")
+      .split(/\n\n+/)
+      .map(function (p) { return "<p>" + p.replace(/\n/g, "<br>") + "</p>"; })
+      .join("");
   }
 
   function populateDayFilter(days) {
