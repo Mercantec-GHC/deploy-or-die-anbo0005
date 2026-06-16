@@ -1,11 +1,11 @@
 :root {
-  --bg: #0f1419;
-  --surface: #1a2332;
-  --border: #2d3a4f;
-  --text: #e8eef4;
-  --muted: #9aabbc;
-  --accent: #3d8bfd;
-  --accent-soft: #1e3a5f;
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --border: #d8dee9;
+  --text: #1a2332;
+  --muted: #5c6b7a;
+  --accent: #2563eb;
+  --accent-soft: #e8f0fe;
   --radius: 10px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -35,12 +35,14 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 1.25rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .site-header h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
+  color: #0f172a;
 }
 
 .tagline {
@@ -66,6 +68,7 @@ main {
 .filter-label {
   font-size: 0.85rem;
   color: var(--muted);
+  font-weight: 500;
 }
 
 #search {
@@ -77,6 +80,12 @@ main {
   background: var(--surface);
   color: var(--text);
   font-size: 1rem;
+}
+
+#search:focus,
+#day-filter:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 #day-filter {
@@ -107,6 +116,7 @@ main {
   border-radius: var(--radius);
   overflow: auto;
   max-height: 70vh;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .term-btn {
@@ -154,11 +164,13 @@ main {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .detail h2 {
   margin: 0 0 0.25rem;
   font-size: 1.35rem;
+  color: #0f172a;
 }
 
 .detail .meta {
@@ -170,11 +182,12 @@ main {
 .detail .lead {
   font-size: 1.05rem;
   margin: 0 0 1rem;
-  color: #c5d4e3;
+  color: #334155;
+  font-weight: 500;
 }
 
 .diagram-box {
-  background: #0c1118;
+  background: #f8fafc;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1rem;
@@ -190,6 +203,7 @@ main {
 .detail .body {
   margin: 0;
   white-space: pre-wrap;
+  color: #334155;
 }
 
 .placeholder {
@@ -205,7 +219,7 @@ main {
 }
 
 .error {
-  color: #f87171;
+  color: #dc2626;
 }
 
 .hidden {
@@ -217,4 +231,5 @@ main {
   padding: 1rem 0;
   color: var(--muted);
   font-size: 0.85rem;
+  background: var(--surface);
 }
