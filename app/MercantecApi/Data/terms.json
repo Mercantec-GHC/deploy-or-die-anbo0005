@@ -30,6 +30,8 @@
     {
       "id": "vm-hardening",
       "day": 1,
+      "dayTitle": "SSH og VM",
+      "title": "VM hardening",
       "summary": "Gør serveren sværere at angribe fra start.",
       "body": "Hardening betyder at lukke unødvendige døre: root kan ikke logge ind via SSH, adgangskode-login er slået fra, kun SSH-nøgle virker. Mindre angrebsflade = færre måder for en angriber at komme ind.",
       "diagram": "vm"
@@ -55,6 +57,8 @@
     {
       "id": "ufw",
       "day": 2,
+      "dayTitle": "DNS og firewall",
+      "title": "UFW firewall",
       "summary": "Brandvæg på VM — kun tilladte porte må ind.",
       "body": "UFW (Uncomplicated Firewall) blokerer indgående trafik som standard. Du åbner kun det nødvendige: 22 (SSH), 80 og 443 (web). Postgres og app på 127.0.0.1 er ikke åbne mod internettet — det er bevidst.",
       "diagram": "firewall"
