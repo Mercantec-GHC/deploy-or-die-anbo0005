@@ -51,5 +51,5 @@ app/MercantecApi/  — ASP.NET Web API + Dockerfile + docker-compose.yml
 - **На сервере:** SSH, UFW, Docker Engine, Nginx (`:8080` → tunnel · `/api/` → `:5000`)
 - **Compose:** `mercantecapi-app-1` + `mercantecapi-db-1` (`:5000` / `:5432`)
 - **В Docker (вне compose):** `cloudflared`
-- **App:** `app/MercantecApi/` — Web API · `/api/weatherforecast` через nginx
+- **App:** `app/MercantecApi/` — Web API · `/`, `/api/terms`, `/api/health` через nginx
 - **Доступ:** Cloudflare Tunnel (нет public IP)

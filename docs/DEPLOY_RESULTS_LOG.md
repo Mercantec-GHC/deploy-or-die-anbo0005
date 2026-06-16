@@ -285,7 +285,7 @@
 
 ### Monitor ✅
 
-- URL: `https://andrii.mercantec.tech/api/weatherforecast`
+- URL: `https://andrii.mercantec.tech/api/health` (ранее `/api/weatherforecast`, заменён на health endpoint)
 - Type HTTP(s) · GET · interval 60s · retries 1 · auth None
 - Статус: **Up** · **200 OK** · ~164 ms (2026-06-15)
 
